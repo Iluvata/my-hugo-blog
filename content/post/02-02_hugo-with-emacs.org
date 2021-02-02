@@ -1,0 +1,54 @@
+---
+title: "用easy-hugo在spacemacs中写hugo博客"
+date: 2021-02-02T21:52:48+08:00
+tags: ['emacs', 'hugo']
+repositories: ['life']
+draft: false
+---
+* 配置easy-hugo layer
+我在github上找到有人写了spacemacs的easy-hugo layer，可以直接用，地址在[[https://github.com/humanfactors/spacemacs-easy-hugo][这里]]. 
+把这个仓库中的 =packages.el= 放到自己的 =.emacs.d/private/hugo= 文件夹下就可以了.
+然后在 =.spacemacs= 文件中的 =dotspacemacs-configuration-layers= 中添加 =hugo= 层. 
+
+这时候如果直接运行 =M-x easy-hugo= 会提示找不到 =easy-hugo-basedir= ，在.spacemacs 
+文件夹下的 =user-config= 项中加上 =(setq easy-hugo-basedir "your-path-to-hugo-basedir"= 
+重新载入就可以运行了。 
+
+* 运行指南 
+在输入 =M-x easy-hugo= 进入easy-hugo mode 后，这个layer已经帮我们重新绑定了几个快捷键 
+
+| Key Binding | Description                            |
+|-------------+----------------------------------------|
+| ~SPC m n~   | 'easy-hugo-newpost                     |
+| ~SPC m D~   | 'easy-hugo-article                     |
+| ~SPC m p~   | 'easy-hugo-preview                     |
+| ~SPC m P~   | 'easy-hugo-publish                     |
+| ~SPC m o~   | 'easy-hugo-open                        |
+| ~SPC m d~   | 'easy-hugo-delete~                     |
+| ~SPC m c~   | 'easy-hugo-open-config                 |
+| ~SPC m f~   | 'easy-hugo-open                        |
+| ~SPC m N~   | 'easy-hugo-no-help                     |
+| ~SPC m v~   | 'easy-hugo-view                        |
+| ~SPC m r~   | 'easy-hugo-refresh                     |
+| ~SPC m s~   | 'easy-hugo-sort-time                   |
+| ~SPC m S~   | 'easy-hugo-sort-char                   |
+| ~SPC m G~   | 'easy-hugo-github-deploy               |
+| ~SPC m A~   | 'easy-hugo-amazon-s3-deploy            |
+| ~SPC m C~   | 'easy-hugo-google-cloud-storage-deploy |
+| ~SPC m q~   | 'evil-delete-buffer                    |
+
+如果记不住，按下 =SPC= 后就会有提示 
+
+比如 =SPC m n= 创建新文章
+
+=SPC m p= 查看文章预览
+
+* layer解析
+这个配置的代码不是很复杂，可以来稍微看一下 
+#+BEGIN_SRC emacs-lisp
+(defconst hugo-packages
+  '(easy-hugo))
+#+END_SRC
+hugo-packages中指定了这个layer需要的package，本次只指定了一个package: easy-hugo. 继续往下看发现在 =set-leader-keys-for-major-mode= 中绑定了 =easy-hugo-mode= 作为主要mode时的一些快捷键. 
+
+所以这个layer基本上就是对 =easy-hugo= package 中的一些快捷键进行了自定义，进一步的资料可以查看[[https://github.com/masasam/emacs-easy-hugo][easy-hugo]]文档.

@@ -1,0 +1,31 @@
+---
+title: "在spacemacs中写scheme"
+date: 2021-02-02T22:35:46+08:00
+tags: ['emacs', 'sicp']
+repositories: ['life', 'learning']
+draft: true
+---
+参考资料：[[https://develop.spacemacs.org/layers/+lang/scheme/README.html][官方文档]] [[https://david6686.github.io/blog/silentink/35940/][在spacemacs安装scheme环境]] [[http://v5b7.com/editor/emacs/scheme.html][在emacs里学习SICP]]
+
+一开始看官方文档和 [[https://david6686.github.io/blog/silentink/35940/][在spacemacs安装scheme环境]] 做了好久，试图在windows上搭起环境，但是中间遇到好多问题，这里记下几个。。
+
+首先是 =chicken= 的安装。文档只说了apt包，但其实pip包也可以？（没试过）。我用的是windows的chocolatey，成功安装了。
+
+在安装了 =chicken= 后，为了完整安装对应文档（不知道为什么不能把文档放到同个包里一起安装了。。。），还要运行一下命令：
+#+BEGIN_SRC shell
+$ chicken-install -s apropos chicken-doc
+$ cd `csi -p '(chicken-home)'`
+$ curl https://3e8.org/pub/chicken-doc/chicken-doc-repo.tgz | sudo tar zx
+#+END_SRC
+在尝试用powershell运行第一条指令时提示不存在cp指令中断了。查了好久资料后发现可以用git shell运行成功。
+
+然后第二条指令其实是运行 =csi= chicken scheme 解释器后运行 ='(chicken-home)'= ，结果作为输出，进入chicken安装目录。
+
+我在安装chicken包时看到安装目录在 =c:/tools/chicken= 下，就直接转过去了（不知道为什么，解释器中这条命令也运行失败。。）
+
+最后是在当前目录下载chicken-doc并且解tar包。但我是在windows下，就手动用浏览器访问https://3e8.org/pub/chicken-doc/
+发现有zip包，下载下来解压后放到 =c:/tools/chicken= 下，这步也算完成了。
+
+接着按照第二个博客中的步骤，确实可以运行了，但看不到输出也不会报错，重启后甚至又不能运行了。。。
+
+太折磨人了，明天试下转到linux用第三个博客中的步骤。

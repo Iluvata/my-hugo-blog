@@ -1,6 +1,6 @@
 baseurl = "https://iluvata.github.io"
-languageCode = "zh"
-defaultContentLanguage = "zh"
+languageCode = "en"
+defaultContentLanguage = "en"
 title = "Iluvata's Blog"
 theme = "dream"
 
@@ -14,12 +14,12 @@ theme = "dream"
 
 [params]
   background = "black"
-  # backgroundImage = "/me/background.jpg"
+  # backgroundImage = "/img/yellowsub.jpg"
   linkColor = "seagreen"
 
   author = "Iluvata"
   # description = ""
-  avatar = "/img/avatar.jpg"
+  avatar = "/img/avatar.png"
   motto = "shine on you crazy diamond"
   # categoriesLimitInHeader = 6
   # headerBottomText = ""
