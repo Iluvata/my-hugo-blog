@@ -5,7 +5,7 @@ tags: ['emacs', 'sicp']
 repositories: ['life', 'learning']
 draft: false
 ---
-参考资料：[[https://develop.spacemacs.org/layers/+lang/scheme/README.html][官方文档]] [[https://david6686.github.io/blog/silentink/35940/][在spacemacs安装scheme环境]] [[http://v5b7.com/editor/emacs/scheme.html][在emacs里学习SICP]]
+参考资料：[[https://develop.spacemacs.org/layers/+lang/scheme/README.html][官方文档]] [[https://david6686.github.io/blog/silentink/35940/][在spacemacs安装scheme环境]] [[http://v5b7.com/editor/emacs/scheme.html][在emacs里学习SICP]] [[geiser.nongun.org/geiser_4.html#The-source-and-the-REPL][geiser文档]]
 
 一开始看官方文档和 [[https://david6686.github.io/blog/silentink/35940/][在spacemacs安装scheme环境]] 做了好久，试图在windows上搭起环境，但是中间遇到好多问题，这里记下几个。。
 
