@@ -5,8 +5,9 @@ tags: ['emacs', 'sicp']
 repositories: ['life', 'learning']
 draft: false
 ---
-参考资料：[[https://develop.spacemacs.org/layers/+lang/scheme/README.html][官方文档]] [[https://david6686.github.io/blog/silentink/35940/][在spacemacs安装scheme环境]] [[http://v5b7.com/editor/emacs/scheme.html][在emacs里学习SICP]] [[geiser.nongun.org/geiser_4.html#The-source-and-the-REPL][geiser文档]]
+参考资料：[[https://develop.spacemacs.org/layers/+lang/scheme/README.html][官方文档]] [[https://david6686.github.io/blog/silentink/35940/][在spacemacs安装scheme环境]] [[http://v5b7.com/editor/emacs/scheme.html][在emacs里学习SICP]] [[http://geiser.nongun.org/geiser_4.html#The-source-and-the-REPL][geiser文档]]
 
+* windows安装
 一开始看官方文档和 [[https://david6686.github.io/blog/silentink/35940/][在spacemacs安装scheme环境]] 做了好久，试图在windows上搭起环境，但是中间遇到好多问题，这里记下几个。。
 
 首先是 =chicken= 的安装。文档只说了apt包，但其实pip包也可以？（没试过）。我用的是windows的chocolatey，成功安装了。
@@ -29,3 +30,8 @@ $ curl https://3e8.org/pub/chicken-doc/chicken-doc-repo.tgz | sudo tar zx
 接着按照第二个博客中的步骤，确实可以运行了，但看不到输出也不会报错，重启后甚至又不能运行了。。。
 
 太折磨人了，明天试下转到linux用第三个博客中的步骤。
+
+* linux安装配置
+  在 =dotspacemacs-configuration-layers= 中添加scheme, 在终端安装 =mit-scheme= 。emacs打开scm文件后 =M-x run-geiser= ，回到scm文件窗口 =C-c C-s= 选择mit.
+
+  在要运行的语句块 =C-x C-e= 即可运行。或者到解释器窗口运行 =(load "yourfile.scm")= = 即可运行。或者到解释器窗口运行 =(load "yourfile.scm")= 或 =C-c C-b= 运行整个文件. 
