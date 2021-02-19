@@ -11,6 +11,8 @@ categories: ["life"]
 需要注意的是这个仓库中还嵌套包含了另外两个仓库，[[https://github.com/iluvata/iluvata.github.io][页面仓库]]对应public文件夹，以及
 [[https://github.com/iluvata/hugo-theme-dream][dream]]主题仓库，对应themes/dream文件夹
 
+- 02-19注：之前以为删了dream里面的.git就可以直接管理整个博客了，后面发现并不行。需要用 =git rm --cached themes/dream= 把git子模块去掉
+
 主题内容配置文件为config.toml，其中配置的路径都是从themes/dream/static文件夹开始的相对路径.
 
 如配置头像所用的avatar="/img/avatar.png"实际所在位置为themes/dream/static/img/avatar.png
