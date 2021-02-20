@@ -2,7 +2,7 @@
 title: "在spacemacs中写scheme"
 date: 2021-02-02T22:35:46+08:00
 tags: ['emacs', 'sicp']
-repositories: ['life', 'learning']
+categories: ['life']
 draft: false
 ---
 参考资料：[[https://develop.spacemacs.org/layers/+lang/scheme/README.html][官方文档]] [[https://david6686.github.io/blog/silentink/35940/][在spacemacs安装scheme环境]] [[http://v5b7.com/editor/emacs/scheme.html][在emacs里学习SICP]] [[http://geiser.nongun.org/geiser_4.html#The-source-and-the-REPL][geiser文档]]

@@ -1,0 +1,34 @@
+---
+title: "hugo博客站点搭建"
+date: 2021-01-08T15:02:22+08:00
+---
+
+由于支持emacs org-mode（顺便还能在github上部署），我选择了hugo进行建站。
+** 安装hugo
+#+begin_src 
+sudo apt-get install hugo
+#+end_src
+** 新建站点
+#+begin_src 
+hugo new site /path/to/site
+#+end_src
+下载主题（我用的是dream）
+本地运行
+#+begin_src
+hugo server --buildDrafts -t dream
+#+end_src
+新建github仓库
+云端部署
+#+begin_src 
+hugo --theme=dream --baseUrl="https://iluvata.github.io/" --buildDrafts
+#+end_src
+** 写/发布文章
+#+begin_src 
+hugo new post/newBlog.org
+hugo --theme=dream --baseUrl="https://iluvata.github.io/" --buildDrafts
+#+end_src
+文章路径为：根目录/content/post/newBlog.org  
+
+云端仓库为：根目录/public （在此目录下管理git）  
+
+云端文章目录为：根目录/public/post/blog  

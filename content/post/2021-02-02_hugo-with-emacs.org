@@ -2,7 +2,7 @@
 title: "用easy-hugo在spacemacs中写hugo博客"
 date: 2021-02-02T21:52:48+08:00
 tags: ['emacs', 'hugo']
-repositories: ['life']
+categories: ["life"]
 draft: false
 ---
 * 配置easy-hugo layer
@@ -11,7 +11,7 @@ draft: false
 然后在 =.spacemacs= 文件中的 =dotspacemacs-configuration-layers= 中添加 =hugo= 层. 
 
 这时候如果直接运行 =M-x easy-hugo= 会提示找不到 =easy-hugo-basedir= ，在.spacemacs 
-文件夹下的 =user-config= 项中加上 =(setq easy-hugo-basedir "your-path-to-hugo-basedir"= 
+文件夹下的 =user-config= 项中加上 =(setq easy-hugo-basedir "your-path-to-hugo-basedir")= 
 重新载入就可以运行了。 
 
 * 运行指南 

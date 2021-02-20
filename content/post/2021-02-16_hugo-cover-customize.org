@@ -3,7 +3,7 @@ title: "自定义hugo封面"
 date: 2021-02-16T18:15:22+08:00
 draft: true
 tags: ['hugo']
-repositories: ['life']
+categories: ['life']
 ---
 
 目前我用的主题 =dream= 会在主页显示每篇文章的封面，在文章参数中添加 =cover= 就可以自己设定。

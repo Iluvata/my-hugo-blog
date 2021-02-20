@@ -3,7 +3,7 @@ title: "年度回顾以及新年目标"
 date: 2021-02-16T19:00:39+08:00
 draft: false
 tags: ['考研', 'work']
-repositories: ['life']
+categories: ['life']
 cover: "/img/2021-02-16_max-coffee.jpg"
 ---
 * 简要回顾
