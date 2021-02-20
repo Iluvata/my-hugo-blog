@@ -2,6 +2,7 @@
 title: "nextcloud网盘搭建"
 date: 2021-02-19T11:45:28+08:00
 draft: false
+cover: '/img/2021-02-19_nextcloud.jpg'
 ---
 
 最近发现在多个设备，系统之间换来换去，文件传输是个问题。想到还有个空闲着的服务器，

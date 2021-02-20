@@ -4,6 +4,7 @@ date: 2021-02-19T13:35:34+08:00
 draft: true
 tags: ['algorithm', 'math']
 categories: ['learning']
+cover: '/img/2021-02-19_dijkstra.jpg'
 ---
 今天刚好在离散里学了用来计算传递闭包的warshall算法，就在这里把离散里计算闭包的算法
 和求最短路径的算法一起整理一下。
@@ -12,7 +13,7 @@ categories: ['learning']
   这里我们讨论的集合都是非公理化的朴素集合论（会导致罗素悖论）。有时间可以了解下公理集合论。
   关系是一个集合中的元素到另一个集合中元素的映射方式。二元关系是两个集合笛卡尔积的子集。
   关系能够具有的性质包括自反性，对称性，传递性，反自反性，反对称性。具有自反、堆成、传递性
-  的关系称为等价关系。
+  的关系称为等价关系。其他的特殊关系有偏序（包含全序、良序、字典序）
   函数可以看作一种特殊的关系。
   函数是每个定义域中元素到唯一一个值域中元素的映射.
   A function from A to B is an assignment of exactly one element
@@ -20,6 +21,7 @@ categories: ['learning']
   包括
    - 单射 一一对应(one-to-one)函数：如果定义域中的两个元素不相等，那值域中对应的两个元素也肯定不相等.
    - 满射（onto）函数：值域中每个值都有对应的定义域元素.
+   - 双射： 满足单射及满射
      https://www.shuxuele.com/sets/injective-surjective-bijective.html
   
 * 动态规划与floyd-warshall算法
