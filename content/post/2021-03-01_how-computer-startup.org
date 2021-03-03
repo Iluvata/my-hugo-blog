@@ -2,9 +2,9 @@
 title: "电脑是怎么启动的"
 date: 2021-03-01T22:52:59+08:00
 draft: false
-tags: ['operating system']
-categories: ['learning', '考研']
-cover: '/img/2021-03-01.jpg'
+tags: ['operating system', '考研']
+categories: ['learning']
+cover: '/img/2021-03-01_grub.jpg'
 ---
 * 启动过程简介
 计算机开机过程大致可以被分为几个阶段：
@@ -16,4 +16,4 @@ cover: '/img/2021-03-01.jpg'
 6. BIOS
 * BIOS
 
-参考链接：[[https://www.cnblogs.com/adamwong/p/10582183.html][计算机启动过程]] [[/img/bootup.pdf][北航课件]]
+参考链接：[[https://www.cnblogs.com/adamwong/p/10582183.html][计算机启动过程]] [[/file/bootup.pdf][北航课件]]
