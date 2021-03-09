@@ -6,14 +6,52 @@ tags: ['operating system', '考研']
 categories: ['learning']
 cover: '/img/2021-03-01_grub.jpg'
 ---
-* 启动过程简介
-计算机开机过程大致可以被分为几个阶段：
+* x86启动过程简介
+x86计算机开机过程大致可以被分为几个阶段：
 1. 按下开机键
-2. cpu跳转至bios
-3. bios进行开机自检
+2. CPU跳转至BIOS物理地址
+3. BIOS进行开机自检
 4. 寻找启动设备
 5. 从MBR加载启动区
-6. BIOS
-* BIOS
+6. BIOS转移控制给BootLoader
+** 第一阶段：硬件
+*** BIOS
+    Basic Input/Output System 基本输入输出系统，被固化在ROM上的一组程序，提供最底层对硬件的控制。
+    也被称为固件。
+**** UEFI
+     Unified Extensible Firmware Interface 统一可拓展固件接口。堆栈传参，动态链接，更大寻址。
+*** MBR
+    Master Boot Record 主引导记录。硬盘的第一个扇区，存放预启动信息、分区表信息。
+** 第二阶段：系统软件
+*** Boot Loader
+    操作系统内核加载器。初始化硬件，建立内存空间映射。
+    - GRUB
+    - LILO
+*** 加载内核
+    根据grub设定的内核映像所在路径读取，解压，放入内存。初始化函数，设备，建立Linux核心环境（初始化寄存器、堆栈）。
+*** 用户层init
+*** 启动内核模块
+*** 执行开机脚本
+*** /bin/login 进入登录状态
+* BIOS和BootLoader
+  BIOS是一个复杂的系统配置软件，它拥有硬件架构的底层信息。当电脑加电时，BIOS首先获得处理器的控制权。
+  它的主要任务是初始化硬件，特别是内存子系统，并且从PC的硬盘驱动器中加载操作系统。
+  
+  在典型的嵌入式系统中，引导加载程序（bootloader）完成与BIOS相同的功能。
 
-参考链接：[[https://www.cnblogs.com/adamwong/p/10582183.html][计算机启动过程]] [[/file/bootup.pdf][北航课件]]
+  BootLoader的任务：
+  - 初始化硬件 如IO控制器、图形控制器
+  - 初始化内存，准备将控制权交给操作系统
+  - 为外设控制器分配资源 如内存
+  - 提供定位机制（虚存？）
+  - 加载操作系统，转移控制权。传递启动信息 如时钟、串口速率
+* 总结  
+  一般的PC按下开机按钮后的第一件事情是CPU运行BIOS程序，进行硬件自检和初始化后从磁盘中加载启动区到内存（内存已初始化完毕）。
+  随后从磁盘中加载的启动程序BootLoader初始化寄存器与堆栈，执行加载操作系统内核的工作。操作系统接管后启动各模块，执行开机任务。
+
+  但是现在的BootLoader程序在嵌入式中的应用广泛，为了适应没有BIOS的硬件，大多具有初始化硬件的能力，即做了BIOS的工作。因此也可以
+  直接把BootLoader放在ROM中，CPU使用BootLoader程序初始化，加载系统。
+
+
+参考链接：[[https://www.cnblogs.com/adamwong/p/10582183.html][计算机启动过程]] [[/file/bootup.pdf][北航课件]] [[https://www.cnblogs.com/nufangrensheng/p/3620656.html][BIOS和BootLoader的对比]] [[https://blog.csdn.net/m0_37751179/article/details/79095183][BIOS, BootLoader, UBoot]]
+

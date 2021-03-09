@@ -69,8 +69,34 @@ return B
 
 * 动态规划
 ** 分治法
-   分治法的核心思想是将问题划分为独立的子问题，递归求解后合并得到问题的解。典型的例子有归并排序。
-   归并排序的步骤：1. 拆分 2. 递归求解 3. 归并 
+   分治法的核心思想是将问题划分为独立的子问题，递归求解后合并得到问题的解。典型的例子有归并排序和二分搜索。
+   归并排序的步骤：1. 拆分 2. 递归求解 3. 归并
+   
+   二分搜索的c++代码
+   #+begin_src c++
+int BinarySearch(int array[], int len, int value)
+{
+	if (array == NULL || len <= 0)
+		return -1;
+ 
+	int low = 0;
+	int high = len - 1;
+	while (low <= high)
+	{
+		int mid = low + (high - low) / 2;
+		if (array[mid] == value)
+			return mid;
+		else if (array[mid] > value)
+			high = mid - 1;
+		else
+			low = mid + 1;
+	}
+ 
+	return -1;
+}
+   #+end_src
+
+   [[https://pintia.cn/problem-sets/994805342720868352/problems/994805381845336064][PAT-1085]]是练习分治法和二分搜索的一个例子。
 ** 动态规划
    分治法是将问题分为多个小的子问题，解决后合并得到解。但这种方式在碰到一些最优化问题时复杂度
    会变成指数级别。比如计算斐波那契数列，用分治法递归计算fib(5)需要计算fin(4)+fib(3)。在计算

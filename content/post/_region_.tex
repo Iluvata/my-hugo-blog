@@ -1,0 +1,29 @@
+\message{ !name(2021-02-22_latex-with-emacs.org.tex)}
+\message{ !name(2021-02-22_latex-with-emacs.org) !offset(-2) }
+#+STARTUP: latexpreview
+---
+title: "在org mode中嵌入latex"
+date: 2021-02-22T23:30:15+08:00
+draft: false
+categories: ['life']
+tags: ['emacs']
+cover: '/img/2021-03-01_latex.jpg'
+---
+
+最近写博客发现就算在想着办法避免使用数学公式，在写有关算法，更不用说数学博客的时候还是不可避免的会碰上好多需要使用latex的情况。
+于是干脆在这里记一下怎么在org mode中内嵌latex。
+
+首先自然是[[https://orgmode.org/manual/Embedded-LaTeX.html][官方文档]].
+
+#+begin_src latex
+
+\begin{equation}                        % arbitrary environments,
+x=\sqrt{b}                              % even tables, figures
+\end{equation}                          % etc
+
+If $a^2=b$ and \( b=2 \), then the solution must be
+either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
+
+#+end_src
+
+\message{ !name(2021-02-22_latex-with-emacs.org.tex) !offset(-29) }
