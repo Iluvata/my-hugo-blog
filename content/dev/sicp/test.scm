@@ -1,5 +1,2 @@
-(define pi 3.14)
-(define radius 10)
-(* pi
-   (* radius radius))
-
+(define x 1)
+(display x)
