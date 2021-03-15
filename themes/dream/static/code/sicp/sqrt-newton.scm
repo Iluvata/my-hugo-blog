@@ -1,4 +1,3 @@
-
 (define (average x y)
   (/ (+ x y) 2))
 (define (square x)
@@ -26,6 +25,7 @@
         guess
         (sqrt-iter (better-guess guess))))
   (sqrt-iter 1.0))
+
 (define x 0.000210000000000)
 (display (sqrt x))
 (newline)
