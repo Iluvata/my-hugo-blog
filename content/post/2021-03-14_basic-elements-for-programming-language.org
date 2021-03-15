@@ -4,7 +4,7 @@ date: 2021-03-14T22:50:46+08:00
 draft: false
 tags: ['sicp']
 categories: ['learning']
-cover: '2021-03-14_lisp.png'
+cover: '/img/2021-03-14_lisp.png'
 ---
 * 编程语言的基本组成
 编程语言的基本组成是SICP的第一节讨论的内容。编程语言所需要的基本元素有3个：原子元素（原子过程、
@@ -73,3 +73,5 @@ cover: '2021-03-14_lisp.png'
       (sqrt-iter 1.0))
   #+end_src
   我们把这种结构叫做块结构。
+
+  源代码：[[/code/sqrt-newton.scm]]
