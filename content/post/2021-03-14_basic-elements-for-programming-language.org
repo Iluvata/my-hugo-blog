@@ -1,0 +1,75 @@
+---
+title: "编程语言的基本组成"
+date: 2021-03-14T22:50:46+08:00
+draft: false
+tags: ['sicp']
+categories: ['learning']
+cover: '2021-03-14_lisp.png'
+---
+* 编程语言的基本组成
+编程语言的基本组成是SICP的第一节讨论的内容。编程语言所需要的基本元素有3个：原子元素（原子过程、
+原子数据结构）、将运算进行复合的能力、对过程进行抽象的能力。
+
+原子元素是语言本身提供给我们的最小过程与数据结构，如乘法 =*= ，整数数据类型. 在scheme中我们将
+一个操作过程写在括号语句内，语句的第一个元素作为运用的过程（操作符），随后的元素作为操作数。如
+#+begin_src scheme
+(* 3 4)
+#+end_src
+
+运算复合的能力使我们能够从基本操作中构建复杂操作，如求解阶乘
+#+begin_src scheme
+  (define (factorial n)
+    (if (< n 2)
+        1
+        (* n (factorial (- n 1)))))
+#+end_src
+
+最后是构建抽象的能力，能够让我们不被所有实现细节扰乱思路，只把之前构建的函数当作黑盒直接拿来
+使用
+#+begin_src scheme
+(factorial 4)
+#+end_src
+
+* 块结构--以牛顿法求平方根为例
+  牛顿法是用于求解方程根的算法，从一个猜测开始每次迭代得到一个更好的猜测，不断向根逼近，直到
+  一个我们指定的要求达到为止。
+  通过使用抽象和运算符合的能力，我们能够构造improve, good-enough?等方法，最终构造出我们想要的
+  sqrt算法。
+  #+begin_src scheme
+    (define (sqrt-iter guess x)
+      (if (good-enough? guess x)
+          guess
+          (sqrt-iter (better-guess guess x) x)))
+
+    (define (sqrt x)
+      (sqrt-iter 2.0 x))
+  #+end_src
+  在求解的过程中，我们定义的一些方法只有在sqrt中才会被用到，如improve, good-enough?等。为了
+  防止和其他代码名称冲突，可以把他们全都放到sqrt的定义内，让他们的作用域只限于sqrt.
+  #+begin_src scheme
+    (define (sqrt x)
+      (define (improve guess x)
+        (average guess (/ x guess)))
+      (define (good-enough? guess x)
+        (< (abs (- x (square guess))) 0.001))
+      (define (sqrt-iter guess x)
+        (if (good-enough? guess x)
+            guess
+            (sqrt-iter (improve guess x))))
+      (sqrt-iter 1.0))
+  #+end_src
+  我们发现sqrt函数中所有的x其实都是同一个，既然improve和good-enough?的作用域在sqrt中，
+  那么其实可以省去x，最终得到的代码为
+  #+begin_src scheme
+    (define (sqrt x)
+      (define (better-guess guess)
+        (average guess (/ x guess)))
+      (define (good-enough? guess)
+        (< (abs (- x (square guess))) 0.001))
+      (define (sqrt-iter guess)
+        (if (good-enough? guess)
+            guess
+            (sqrt-iter (better-guess guess))))
+      (sqrt-iter 1.0))
+  #+end_src
+  我们把这种结构叫做块结构。

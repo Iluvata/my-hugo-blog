@@ -16,11 +16,11 @@ cover: '/img/2021-03-09_database.png'
   
   数据库系统的层次结构如下
   
-  软硬件层次：
+  *软硬件层次*
   
   [[/img/2021-03-14_database-hardware-structure.jpg]]
 
-  DBMS管理层次：
+  *DBMS管理层次*
   [[/img/2021-03-14_dbms-management-structure.jpg]]
 
   关系型数据库中的“关系”即我们在离散数学中学过的关系(relation)：多个集合的笛卡尔积的子集。
