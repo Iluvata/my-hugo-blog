@@ -1,0 +1,53 @@
+% Created 2021-03-15 周一 23:00
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.3.1 (Org mode 9.3.6)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+---
+title: "在org mode中嵌入latex"
+date: 2021-02-22T23:30:15+08:00
+draft: false
+categories: ['life']
+tags: ['emacs']
+cover: '/img/2021-03-01\textsubscript{latex.jpg}'
+---
+
+最近写博客发现就算在想着办法避免使用数学公式，在写有关算法，更不用说数学博客的时候还是不可避免的会碰上好多需要使用latex的情况。
+于是干脆在这里记一下怎么在org mode中内嵌latex。
+
+
+\begin{equation}                        \% arbitrary environments,
+x=\sqrt{b}                              \% even tables, figures
+\end{equation}                          \% etc
+
+If \(a^2=b\) and \(b=2\), then the solution must be
+either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
+
+
+
+参考链接：\href{https://orgmode.org/manual/Embedded-LaTeX.html}{官方文档} \href{https://blog.poi.cat/post/spacemacs-plus-org-mode-plus-latex}{Spacemacs和Org-mode和\LaTeX{}}
+\end{document}

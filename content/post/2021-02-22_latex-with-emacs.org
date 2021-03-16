@@ -10,9 +10,7 @@ cover: '/img/2021-03-01_latex.jpg'
 最近写博客发现就算在想着办法避免使用数学公式，在写有关算法，更不用说数学博客的时候还是不可避免的会碰上好多需要使用latex的情况。
 于是干脆在这里记一下怎么在org mode中内嵌latex。
 
-
-
-
+#+OPTIONS: tex:t
 \begin{equation}                        % arbitrary environments,
 x=\sqrt{b}                              % even tables, figures
 \end{equation}                          % etc
@@ -20,6 +18,8 @@ x=\sqrt{b}                              % even tables, figures
 If $a^2=b$ and \( b=2 \), then the solution must be
 either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
 
+但是虽然orgmode支持的latex能导出pdf，hugo生成的html网页还是不支持。
 
 
-参考链接：[[https://orgmode.org/manual/Embedded-LaTeX.html][官方文档]] [[https://blog.poi.cat/post/spacemacs-plus-org-mode-plus-latex][Spacemacs和Org-mode和LaTeX]]
+
+参考链接：[[https://orgmode.org/manual/Embedded-LaTeX.html][官方文档]] [[https://blog.poi.cat/post/spacemacs-plus-org-mode-plus-latex][Spacemacs和Org-mode和LaTeX]] [[https://orianna-zzo.github.io/sci-tech/2018-03/blog%E5%85%BB%E6%88%90%E8%AE%B06-hugo%E4%B8%AD%E7%9A%84latex%E6%B8%B2%E6%9F%93/][Hugo中的LaTeX渲染]] [[https://corpython.github.io/post/hugo%E6%B7%BB%E5%8A%A0latex%E5%85%AC%E5%BC%8F%E6%B8%B2%E6%9F%93/][Hugo中添加LaTeX渲染]]
