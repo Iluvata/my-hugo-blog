@@ -2,7 +2,7 @@
 title: "计算机体系结构与组成原理"
 date: 2021-03-15T13:13:42+08:00
 draft: false
-tags: ['operating system']
+tags: ['operating system', '考研']
 categories: ['learning']
 cover: '/img/2021-03-15_A-Simplified-MIPS-Processor-Architecture.png'
 ---
