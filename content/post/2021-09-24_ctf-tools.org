@@ -1,0 +1,62 @@
+---
+title: "CTF基本工具使用指南"
+date: 2021-09-24T14:43:07+08:00
+draft: true
+tags: ['ctf', 'pwn']
+categories: ['learning']
+---
+
+* pwntools
+
+** io交互
+
+** elf
+
+* ida pro
+
+* gdb-peda
+  
+** print
+
+** exam
+
+** info
+   
+*** 展示内存映射信息
+    i proc mappings
+
+*** 展示寄存器值
+    i registers
+    i registers eax
+    p $eax
+
+* 其他
+
+** gdb调试时输入payload
+   有时候我们想要动态调试程序，查看payload执行结果。但是gdb调试中不能直接输入不可见字符。
+   可以用脚本生成payload保存为文件后在gdb中重定向输入执行。
+   gdb中用 =run < payload= 重定向
+
+** ROPgadget
+   搜索gadget
+   ROPgadget --binary [file] --only "pop|ret"
+
+   实例：
+   - 搜索libc.so.6中 =pop %rdi; ret=
+     ROPgadget --binary /lib/x86_64-linux-gnu/libc.so.6 --only "pop|ret" | grep "rdi"
+   
+** strings搜索二进制文件中字符串
+   strings -a -tx [file] | grep [string-needed]
+
+   -a Scan the entire file, not just the data section [default]
+   -t --radix={o,d,x} Print the location of the string in base 8, 10 or 16
+
+** nm搜索文件中的symbol
+   -D 搜索动态符号
+
+   实例：
+   - 搜索libc.so.6中的 =system=
+     nm -D /lib/x86_64-linux-gnu/libc.so.6 | grep "system"
+* 参考资料
+  - [[https://www.pianshen.com/article/1581166709/][gdb调试]]
+  - [[https://blog.csdn.net/weixin_43901038/article/details/105499821][字符串生成与定位]]
