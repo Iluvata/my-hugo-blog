@@ -1,0 +1,18 @@
+---
+title: "ROP"
+date: 2021-11-13T01:57:10+08:00
+draft: true
+---
+* BROP
+** 确定retaddr的偏移
+** 寻找stopgadget
+可以用io.recv()是否成功来判断是否为stopdadget，并且可以根据返回的内容大致猜测覆盖的地址是什么函数
+** 寻找bropgadget
+所谓bropgadget其实就是__libc_csu_init里最后一段包含6个连续pop的汇编，对这段汇编进行偏移还能构造出对于另外几个寄存器的pop。
+寻找方法也就是在猜测的retaddr后跟6个trap（会导致程序崩溃的retaddr），再跟上之前找到的stopgadget，最后再跟几个trap。验证的方法可以是在跟上6个trap后不跟stopgadget而是直接跟上trap，看是否会崩溃（如果不会崩溃，有可能是遇到了plt表。为什么plt表不会崩溃？因为plt表用jmp直接跳转去执行函数了）。
+** 寻找puts/write@plt
+通过尝试puts出elf头的\x7fELF确定是否遇到了puts的plt
+** dump出内存
+用之前得到的puts@pltdump出内存
+** 在dump出的内存中找到任意函数的got，打印出got内容从而确定libc和偏移
+** ret2libc

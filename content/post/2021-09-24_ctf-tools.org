@@ -1,20 +1,144 @@
 ---
-title: "CTF基本工具使用指南"
+title: "CTF基本工具使用指北"
 date: 2021-09-24T14:43:07+08:00
-draft: true
+draft: false
 tags: ['ctf', 'pwn']
 categories: ['learning']
 ---
 
+* 环境搭建
+在mac上我觉得比较好用的环境是multipass中ubuntu虚拟机+宿主机中的idapro，以及宿主机上vscode写python wp，在虚拟机中运行。
+
+multipass默认分配的内存和磁盘不太够用，建议内存分4G，磁盘分15G。ubuntu版本选择16.04. 虚拟机内环境配置可以参考[[https://github.com/giantbranch/pwn-env-init][pwn-env-init]]，建议使用py2. 但是脚本是用apt-get安装pip的，可能会有些问题，需要 =curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py= 然后运行 =get-pip.py= 。还有 =one_gadget= 目前需要ruby版本高于2.4，apt-get安装的ruby是2.3。可以执行下面的命令安装
+
+#+begin_src shell
+$ sudo apt-add-repository ppa:brightbox/ruby-ng
+
+$ sudo apt-get update
+
+$ sudo apt-get install ruby2.4 ruby2.4-dev
+
+$ ruby2.4 -v
+#+end_src
+
+还可以装个 =tmux= ，在pwntools连接gdb调试的时候在开头加上下面代码就可以分出调试窗口（虽然我现在也还没配好pwntools舒服地连gdb的环境。。。）。
+
+#+begin_src python
+context.arch="amd64"
+context.terminal = ['tmux', 'splitw', '-h']
+#+end_src
+
 * pwntools
 
 ** io交互
+*连接*
+
+#+begin_src
+本地 ：sh = porcess("./level0")
+远程：sh = remote("127.0.0.1",10001)
+关闭连接：sh.close()
+#+end_src
+
+*io*
+
+#+begin_src
+sh.send(data)  发送数据
+sh.sendline(data)  发送一行数据，相当于在数据后面加\n
+sh.recv(numb = 2048, timeout = dufault)  接受数据，numb指定接收的字节，timeout指定超时
+sh.recvline(keepends=True)  接受一行数据，keepends为是否保留行尾的\n
+sh.recvuntil("Hello,World\n",drop=fasle)  接受数据直到我们设置的标志出现
+sh.recvall()  一直接收直到EOF
+sh.recvrepeat(timeout = default)  持续接受直到EOF或timeout
+sh.interactive()  直接进行交互，相当于回到shell的模式，在取得shell之后使用
+#+end_src
+
+有些人习惯在wp开头定义一些缩写
+
+#+begin_src python
+l64 = lambda            : u64(p.recvuntil('\x7f')[-6:].ljust(8,'\x00'))
+l32 = lambda            : u32(p.recvuntil('\xf7')[-4:].ljust(4,'\x00'))
+sla = lambda a,b        : p.sendlineafter(str(a),str(b))
+sa  = lambda a,b        : p.sendafter(str(a),str(b))
+lg  = lambda name,data  : p.success(name + ': 0x%x' % data)
+se  = lambda payload    : p.send(payload)
+rl  = lambda            : p.recv()
+sl  = lambda payload    : p.sendline(payload)
+ru  = lambda a          : p.recvuntil(str(a))
+#+end_src
 
 ** elf
+#+begin_Src python
+>>> e = ELF('/bin/cat')
+>>> print hex(e.address)  # 文件装载的基地址
+0x400000
+>>> print hex(e.symbols['write']) # 函数地址
+0x401680
+>>> print hex(e.got['write']) # GOT表的地址
+0x60b070
+>>> print hex(e.plt['write']) # PLT的地址
+0x401680
+>>> print hex(e.search('/bin/sh').next())# 字符串/bin/sh的地址
+#+end_Src
+
+** shellcode
+=asm= 模块用于汇编和反汇编， =shellcode= 模块用于生成shellcode.
+
+用asm汇编
+#+begin_src python
+>>> asm('nop')
+'\x90'
+>>> asm('nop', arch='arm')
+'\x00\xf0 \xe3'
+#+end_src
+
+可以在开头用context指定架构
+#+begin_src python
+>>> context.arch      = 'i386'
+>>> context.os        = 'linux'
+>>> context.endian    = 'little'
+>>> context.word_size = 32
+#+end_src
+
+disasm进行反汇编
+#+begin_src python
+>>> print disasm('6a0258cd80ebf9'.decode('hex'))
+   0:   6a 02                   push   0x2
+   2:   58                      pop    eax
+   3:   cd 80                   int    0x80
+   5:   eb f9                   jmp    0x0
+#+end_src
+
+shellcraft生成shellcode
+#+begin_src python
+>>> print shellcraft.i386.nop().strip('\n')
+    nop
+>>> print shellcraft.i386.linux.sh()
+    /* push '/bin///sh\x00' */
+    push 0x68
+    push 0x732f2f2f
+    push 0x6e69622f
+...
+#+end_src
+
+#+begin_Src python
+from pwn import *
+context(os='linux',arch='amd64')
+shellcode = asm(shellcraft.sh())
+
+或者
+
+from pwn import *
+shellcode = asm(shellcraft.amd64.linux.sh())
+#+end_src
+
+** fmtstr
+** rop
+
+** memleak
 
 * ida pro
 
-* gdb-peda
+* gdb
   
 ** print
 
@@ -57,6 +181,35 @@ categories: ['learning']
    实例：
    - 搜索libc.so.6中的 =system=
      nm -D /lib/x86_64-linux-gnu/libc.so.6 | grep "system"
+
+** patchelf & ldd 修改ELF文件动态链接信息
+有些题目会提供libc，在本地调试的时候需要更换对应libc版本。可以用[[https://github.com/matrix1001/glibc-all-in-one][glibc-all-in-one]]下载不同版本的 =ld.so= 和 =libc.so= . 然后用 =patchelf= 修改ELF文件。
+
+#+begin_src shell
+patchelf --set-rpath ${path} ./${name}
+patchelf --set-interpreter ${path}/ld-${version}.so ./${name}
+#+end_src
+
+修改前后可以用 =ldd= 和 =file= 命令查看文件的libc和ld。
+
+#+begin_src shell
+$  Nnote ldd Nnote
+	linux-vdso.so.1 =>  (0x00007fffb11aa000)
+	libc.so.6 => /home/ubuntu/glibc-all-in-one/libs/2.31-0ubuntu9_amd64/libc.so.6 (0x00007fec6e7d2000)
+	/home/ubuntu/glibc-all-in-one/libs/2.31-0ubuntu9_amd64/ld-2.31.so => /lib64/ld-linux-x86-64.so.2 (0x00007fec6e7a8000)
+$  Nnote ldd Nnote_bak
+	linux-vdso.so.1 =>  (0x00007ffedd9fc000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3be3a3d000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f3be3e07000)
+$  Nnote file Nnote
+Nnote: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /home/ubuntu/glibc-all-in-one/libs/2.31-0ubuntu9_amd64/ld-2.31.so, BuildID[sha1]=27ade7b137a313e3ada867e5bb89d2060dabea54, for GNU/Linux 3.2.0, stripped
+#+end_src
+
+在pwntools连接程序的时候也可以用 =p = process(["/path/to/ld.so", "./test"], env={"LD_PRELOAD":"/path/to/libc.so.6"})= ，但用这种方法我还没成功过。。
+
 * 参考资料
   - [[https://www.pianshen.com/article/1581166709/][gdb调试]]
   - [[https://blog.csdn.net/weixin_43901038/article/details/105499821][字符串生成与定位]]
+  - [[https://bbs.pediy.com/thread-254868.htm][关于不同版本glibc更换的一些问题]]
+  - [[https://firmianay.gitbooks.io/ctf-all-in-one/content/doc/2.4.1_pwntools.html#pwntools-%E5%9C%A8-ctf-%E4%B8%AD%E7%9A%84%E8%BF%90%E7%94%A8][pwntools在ctf中的利用]]
+  - [[https://www.jianshu.com/p/355e4badab50][pwntools使用]]

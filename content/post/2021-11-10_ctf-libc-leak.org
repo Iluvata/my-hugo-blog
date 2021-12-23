@@ -10,7 +10,10 @@ libc泄漏在pwn题里很常见，在这里整理一下常见的泄漏libc的方
 ROP中的ret2libc需要知道libc的版本和偏移，需要泄漏内存中函数的地址。
 fmtstr中有时需要知道libc的偏移后用system函数覆盖某些函数的got。
 堆利用中也会有用system覆盖函数got的利用方式。
-
+* 常见泄漏方法
+** 未知libc版本时
+常用的泄漏方法有泄漏某个函数的got内容，根据泄漏的地址用LibcSearcher搜索libc。函数的got地址可以用ELF在目标二进制文件中搜到。
+在可以泄漏任意地址内容的时候可以用DynELF。
 * 格式化字符串漏洞
 ** NJCTF2017 [[https://www.bookstack.cn/read/CTF-All-In-One/doc-6.1.2_pwn_njctf2017_pingme.md][pingme]]
 这题是blind fmt，只提供了ip和端口。在从内存dump下代码后搜索到printf@got，泄漏出printf地址。用泄漏的printf地址搜索libc-database得到libc版本后在libc中搜到system，用system和printf的相对地址转化得到system在进程中的地址。然后利用fmtstring用system覆盖printf@got。
