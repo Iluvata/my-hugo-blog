@@ -1,8 +1,11 @@
 ---
 title: "ROP"
 date: 2021-11-13T01:57:10+08:00
-draft: true
+draft: false
+tags: ['pwn', 'ctf']
+categories: ['learning']
 ---
+
 * BROP
 ** 确定retaddr的偏移
 ** 寻找stopgadget
@@ -16,3 +19,5 @@ draft: true
 用之前得到的puts@pltdump出内存
 ** 在dump出的内存中找到任意函数的got，打印出got内容从而确定libc和偏移
 ** ret2libc
+
+* SROP

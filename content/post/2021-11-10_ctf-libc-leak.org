@@ -43,3 +43,9 @@ DynELF 不要求我们拿到 libc.so，所以如果我们查询不到 libc.so �
 * main arena
 ** 字符串非'\x00'结尾
 *** HITBCTF2018 [[https://www.bookstack.cn/read/CTF-All-In-One/doc-6.1.2_pwn_njctf2017_pingme.md][gundam]]
+
+* libc版本
+** 2.31
+2.31下的堆，只能申请 0x80 大小以下的堆块，但可申请的大小包含了 0
+
+首先需要知道一个知识点，malloc 在执行 malloc( 0 ) 时仍然会返回一个最小的堆块，那么此时记录堆块 size 的值会变成0，此时再edit这个堆块，会发生 0 - 1 整数溢出，导致可以写入很大一块内存。
