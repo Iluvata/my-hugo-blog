@@ -1,0 +1,37 @@
+---
+title: "N1Book Web 学习"
+date: 2021-12-28T00:17:37+08:00
+draft: false
+tags: ['ctf', 'web']
+categories: ['learning']
+---
+
+[[https://buuoj.cn/challenges][buuctf]] n1book web刷题
+* 信息收集
+** 常见的收集
+网站上可能会有敏感目录/文件导致信息泄漏，如.git，vim的备份文件.swp等。可以用[[https://github.com/maurosoria/dirsearch][dirsearch]]扫描站点目录。
+
+#+begin_src shell
+cd dirsearch
+python3 dirsearch.py -u 192.168.21.128 -e php
+#+end_src
+
+- -u 指定目标ip
+- -e 指定网站语言
+- -w 可以加上自己的字典（带上路径）
+- –random-agents 使用代理（使用的代理目录在uesr-agents.txt中，可以自己添加）
+
+脚本扫描的数据库在 =db= 文件夹，可以自己加。这题的目标文件有三个： =robots.txt= , =index.php~= , =.index.php.swp= 。我一开始扫了2次没扫出来，指定了php语言后扫出了robots.txt。
+
+robots.txt是网站定的允许爬虫规则；后缀为~的是gedit的备份文件；.文件名.swp是vim的备份文件。
+
+** 粗心的小李
+git泄漏题可以用的工具有[[https://github.com/lijiejie/githack][GitHack]]，[[https://github.com/denny0223/scrabble][scrabble]]。只要目标网站上有.git，运行脚本就能把网站dump下来。
+
+#+begin_src shell
+GitHack.py http://www.openssl.org/.git/
+#+end_src
+
+#+begin_Src shell
+scrabble http://example.com/
+#+end_src
