@@ -2,6 +2,8 @@
 <link href="{{ .Site.Params.favicon }}" rel="shortcut icon" type="image/x-icon" />
 {{ end }}
 
+{{ if .Params.math }}{{ partial "helpers/katex.html" .}}{{ end }}
+
 {{ if eq .Type "posts" }}
 <!-- Page Author & Description -->
 <meta name="author" content="{{ if isset .Params "author" }}{{ .Params.author }}{{ else }}{{ .Site.Params.author }}{{ end }}" />
