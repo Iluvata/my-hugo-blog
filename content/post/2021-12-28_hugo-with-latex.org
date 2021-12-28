@@ -1,0 +1,54 @@
+---
+title: "在hugo中使用latex"
+date: 2021-12-28T20:04:31+08:00
+draft: false
+tags: ['hugo', 'math']
+categories: ['learning']
+math: true
+---
+
+主要参考[[https://mertbakir.gitlab.io/hugo/math-typesetting-in-hugo/][这片文章]]。在katex官网找到[[https://katex.org/docs/autorender.html][Auto-render]]拓展，在生成的html<head>段中加上以下代码就行了。
+
+#+begin_src html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js" integrity="sha384-z1fJDqw8ZApjGO3/unPWUPsIymfsJmyrDVWC8Tv/a1HeOtGmkwNd/7xUS0Xcnvsx" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js" integrity="sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+#+end_src
+
+加入的方法为在模板中添加。模板位置为（以我的dream主题为例） =/themes/dream/layouts/partials/helpers/katex.html= 。但是不要直接照搬上面的代码，最好去网站找最新代码。
+
+为了能够控制哪些博客需要渲染，而不是渲染所有博客，在 =/themes/dream/layouts/partials/head.html= 添加以下代码
+
+#+begin_src
+{{ if .Params.math }}{{ partial "helpers/katex.html" . }}{{ end }}
+#+end_src
+
+在需要渲染的博客头上添加
+
+#+begin_Src
+---
+math: true
+---
+#+end_src
+
+如果需要渲染行内表达式，即渲染 =$x = {-b \pm \sqrt{b^2-4ac} \over 2a}$= 为 $x = {-b \pm \sqrt{b^2-4ac} \over 2a}$ ，在 =katex.html= 中写入下面代码
+
+#+begin_Src html
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement(document.body, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    });
+</script>
+#+end_src
+
+最后放一个跨行公式测试效果
+
+$$
+H(p_1, \cdots, p_n) = -\sum^{n}_{i=1}p_i{log}_2p_i
+$$
