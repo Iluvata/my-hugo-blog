@@ -1,0 +1,244 @@
+---
+title: "数理统计复习"
+date: 2021-12-29T14:47:10+08:00
+draft: false
+math: true
+---
+
+* 第一张 抽样分布
+
+** 充分统计量
+*统计量* 是不含任何未知参数的，样本的函数。 *充分统计量* 是包含了样本中关于总体参数（参数估计）的所有信息的统计量。若 $T(x_1, x_2, \cdots, x_n)=t$ 是关于参数 $\theta$ 的充分统计量， 条件分布函数 $F_{\theta}(x_1, x_2, \cdots, x_n | t)$ 与参数 $\theta$ 无关。因为T中已经包含了样本中关于 $\theta$ 的所有信息，在知道 $t$ 后从参数中提取不出更多和 $\theta$ 有关的信息了。
+
+常用 *因子分解定理* 求充分统计量。若样本 $x_1, x_2, \cdots, x_n$ 的联合分布 $p(x;\theta)$ 可以进行如下分解
+$$p(x;\theta)=g(T(x),\theta)h(x)$$
+则 $T(x)$ 是 $\theta$ 的充分统计量。这里的分解是先提取出仅含有 $x$ 的因子，然后尝试把剩下的因子中的 $\theta$ 和 $x$ 分开，写作他们两之间的函数。分开后仅含有 $x$ 的表达式就是充分统计量。
+
+*** 例题
+给一个总体的密度函数 $p(x;\theta)$ 和简单样本 $x_1, x_2, \cdots, x_n$ ，求 $\theta$ 的充分统计量。其中 $g(T(X), \theta)$ 里可能会包含有 $x$ 和 $\theta$ 的示性函数，这时候把可以考虑用顺序统计量把 $x_{(n)}$ 和 $x_{(1)}$ 分出来。
+
+** 三种分布--卡方分布、t分布、F分布
+
+- 卡方分布
+n个标准正态分布的平方和，记做 $\chi^2(n)$ ，自由度为n。
+- t分布
+设 $X\sim N(0,1), Y\sim \chi^2(n)$ ，X与Y相互独立。
+$$
+T=\frac{X}{\sqrt{Y / n}} \sim t(n)
+$$
+自由度为n。
+- F分布
+设 $X\sim \chi^2(n_1), Y\sim \chi^2(n_2)$ ，X与Y相互独立。
+$$
+F=\frac{X/n_1}{Y/n_2} \sim F(n_1, n_2)
+$$
+自由度为 $(n_1, n_2)$ 。
+
+*** 例题
+题目会告诉你n个来自某总体（一般是正态）的简单样本，给一个统计量T，需要计算T中包含的某参数c使得T服从F/t分布。
+
+做题过程中常用到的一些结论如下
+- $\frac{(n-1)S^2}{\sigma^2}=\frac{1}{\sigma^2}\sum^{n}_{k=1}(X_k-\bar{X})^2 \sim \chi^2(n-1)$
+- $\frac{\bar{X}-\mu}{\sigma/\sqrt{n}} \sim N(0, 1)$
+- $\frac{\bar{X}-\mu}{S/\sqrt{n}} \sim t(n-1)$
+- $\frac{(\bar{x}-\mu)^2}{S^2/n} \sim F(1, n-1)$
+
+知道[[https://www.jianshu.com/p/7dccb45ee9b3][第一个结论的证明]]后不难推出后面几个的证明。这些证明也都能在教材上找到。解题过程中还会用到的其他一些期望和方差的性质。
+
+
+** 分位数
+* 第二章 参数估计
+参数估计是构造合适的统计量 $T(x_1, x_2, \cdots, x_n)$ 作为参数 $q(\theta)$ 的估计，记做 $\hat{q}(x_1, x_2, \cdots, x_n) = T(x_1, x_2, \cdots, x_n)$ 。
+** 点估计
+*** 频率替换法
+用频率替换对应的概率。
+*** 矩估计法
+用样本矩替换对应的总体矩。求法一般是把待估参数标识为总体各阶矩的函数，用样本矩替换。
+*** 极大似然估计法
+构造似然函数 $L(\theta)$ ，使得似然函数在参数空间 $\Theta$ 中取到上确界的 $\hat{\theta}$ 就是 $\theta$ 的极大似然估计。
+
+题目中有可能出现参数空间不取整个欧式空间，只取其中一部分的情况。这时可能需要用min/max函数或分类讨论。
+** 估计量评优准则
+*** 无偏、有效、一致（相合）估计
+- 无偏： $E(\hat{\theta})=E(\theta)$
+- 有效性：估计量的方差越小越有效。若 $D(\hat{\theta_1})<D(\hat{\theta_2})$ 则 $\hat{\theta_1}$ 比 $\hat{\theta_2}$ 更有效。
+- 一致性（相合性）：大样本下估计值接近真实值。当 $\forall \varepsilon>0$ 有: $\lim _{n \rightarrow \infty} P(|\hat{\theta}-\theta| \geq \varepsilon)=0$
+- 有效估计：对参数空间中的任意参数，方差都达到C-R下界的无偏估计。
+
+**** 例题
+给一个估计量问是否是无偏估计。只需求期望就行。难点在求期望的步骤，可能会用到一些常见分布的期望/方差。
+
+问一个UMVUE是否为有效估计。
+
+*** 一致最小方差无偏估计--UMVUE
+UMVUE是对参数空间中的任何参数，方差比其他无偏估计都小的估计（统计量）。计算方法有3种，分别是 1. 用存在性定理 2. 无偏估计对完全充分统计量的条件期望 3. 完全充分统计量的无偏函数。其中后两种依赖于Lehmann-Scheffe定理，都需要事先知道完全充分统计量 $S(x)$ 。因为第一种方法计算极为繁琐，题目中一般用后两种。
+
+**** UMVUE--存在性求解
+其实UMVUE不仅存在，还是唯一的，具有唯一性。证明可以看课本。存在性定理是指： $T(x)$ 是 $q(\theta)$ 的UMVUE的充要条件是，对任意的 $T_0(x) \in U_0$ ，等式 $$E_{\theta}[T_0(x)T(x)]=0$$ 对所有 $\theta \in \Theta$ 都成立。 $U_0$ 是均值为0，方差有限的统计量组成的类。
+**** UMVUE--完全充分统计量求解
+分布族 $\{P_{\theta}:\theta \in \Theta \}$ 是 *完全* 的是指：如果对一切 $\theta \in \Theta , E_{\theta}(g(X))=0$ 成立，就意味着对一切 $\theta \in \Theta$ ，必有 $P_{\theta}\{g(X)=0\}=1$ 成立。若 $T(x_1, x_2, \cdots, x_n)$ 的分布族是完全的， $T$ 就是 *完全统计量* 。直观地理解，若一个分布族中 *随机变量期望为0蕴含（能推出）随机变量本身为0* ，它就是完全的。完全统计量则是属于这种分布族的统计量。
+
+直接证明某个统计量是否完全比较困难，但有如下 *充分性定理* :
+样本 $x_{1}, x_{2}, \cdots, x_{n}$ 的联合密度函数 (或联合分布列) 可分解为
+
+$$p\left(x_{1}, x_{2}, \cdots, x_{n} ; \theta\right)=c(\theta) h\left(x_{1}, x_{2}, \cdots, x_{n}\right) \exp \left\{\sum_{k=1}^{m} w_{k}(\theta) T_{k}\left(x_{1}, x_{2}, \cdots, x_{n}\right)\right\}$$
+
+其中 $h\left(x_{1}, x_{2}, \cdots, x_{n}\right)$ 仅是 $x_{1}, x_{2}, \cdots, x_{n}$ 的函数, $w=w(\theta)=\left(w_{1}(\theta), \cdots, w_{m}(\theta)\right)$ 是定义在 $m$ 维参数空间 $\Theta$ 上取值于 $\Lambda \subset \mathbf{R}^{m}$ 的向量函数, $c(\theta)$ 仅是 $\theta$ 的函数。如果 $w(\theta)$ 值域 $\Lambda$ *包含内点* ,则 $m$ 维统计量是 *完全充分* 的。
+
+类似求充分统计量的因子分解法，求 *完全充分统计量* 的方法也是对样本的联合密度函数进行分解。先将样本联合密度函数分解为三部分，分别是完全只有 $\theta$  的函数组成的因子、完全只有 $x$ 的函数组成的因子、能分解成多个 $\theta$ 的函数和 $x$ 的函数（统计量）的乘积 $w(\theta)T(x)$ 之和的指数函数的因子。如果 $w$ 包含内点，统计量 $(T_1, T_2, \cdots, T_m)$ 就是完全充分的。
+
+*Lehmann-Scheffe定理* 是给一个完全充分统计量 $S(x)$ 和一个对 $\theta$ 的方差有限的无偏估计 $\varphi(x)$ ， $\theta$ 的UMVUE就是 $T(x)=E_{\theta}(\varphi(x) | S(x))$ 。其实前面还有一个 *Rao-Blackwell定理* ，讲的是若 $S(x)$ 是 *充分统计量* ， $T(x)=E_{\theta}(\varphi(x) | S(x))$ 的方差小于等于 $\varphi(x)$ 的方差。但因为这个用的不多，就只在这里提一下。
+
+现在我们可以实际用Lehmann-Scheffe定理给出的两种方法求UMVUE了。首先找一个完全充分统计量 $S(x)$ ，参数 $\theta$ 的UMVUE就是：1. $T(x)=E_{\theta}(\varphi(x) | S(x))$ ， 其中 $\varphi(x)$ 是 $\theta$ 的无偏估计。2. 将一个 $S(x)$ 的函数 $h(S(x))$ 无偏化得到的结果。无偏化的过程一般是先求出 $E(S(x))$ ，再乘上一个参数使得 $E(cS(x)) = \theta$ ，最后的 $T(x) = h(S(x)) = cS(x)$ 。
+*** C-R下界与有效估计
+信息不等式，又称 *Cramer-Rao不等式* ，给出了无偏估计方差的下界。
+$$\mathrm{V} \mathrm{ar}_{\theta}\left(T\left(x_{1}, x_{2}, \cdots, x_{n}\right)\right) \geqslant \frac{\left[q^{\prime}(\theta)\right]^{2}}{n I(\theta)}$$
+
+称 $\frac{\left[q^{\prime}(\theta)\right]^{2}}{n I(\theta)}$ 为 *C-R下界* 。当 $q(\theta)=\theta$ 时， $q^{\prime}(\theta)=1$ ，C-R下界变为 $\frac{1}{n I(\theta)}$ 。其中的 $I(\theta)$ 为 *Fisher信息量*
+$$
+I(\theta)=E_{\theta}\left[\frac{\partial}{\partial \theta} \ln p(x ; \theta)\right]^{2}
+$$
+如果 $\frac{\mathrm{d}^{2}}{\mathrm{~d} \theta^{2}} \int_{-\infty}^ {+\infty} p(x ; \theta) \mathrm{d} x=\int_{-\infty}^{ +\infty} \frac{\partial^{2} p(x ; \theta)}{\partial \theta^{2}} \mathrm{~d} x$ 成立, 则可以证明上式等价于
+$$
+I(\theta)=-E_{\theta}\left[\frac{\partial^{2}}{\partial \theta^{2}} \ln p(x ; \theta)\right]
+$$
+一般来说，求二阶偏导后求期望要比求平方的期望要简单。Fisher信息量中含有参数 $\theta$ ，从直观上理解 $I(\theta)$ 是对 $\theta$ 信息多少的度量，是样本容量为1的样本 $x_1$ 所包含参数 $\theta$ 的信息量。Fisher信息量是可加的。n个样本中所包含的信息量为 $nI(\theta)$ 。即
+$$
+I_{n}(\theta)=E_{\theta}\left[\frac{\partial}{\partial \theta} \ln p\left(x_{1}, x_{2}, \cdots, x_{n} ; \theta\right)\right]^{2}=nI(\theta)
+$$
+统计量 $T$ 中所包含的参数 $\theta$ 的信息量应当小于等于所有样本 $(x_1, x_2, \cdots, x_n)$ 中包含的信息量，等号只在 $T$ 是充分统计量时成立。
+
+C-R不等式成立是有条件的，要求总体的密度函数族是C-R正则族，并且 $0<I(\theta)<+\infty$ 。 *C-R正则族* 满足
+1. 使密度函数大于0的自变量集合（又叫 *分布的[[https://zh.wikipedia.org/wiki/%E6%94%AF%E6%92%91%E9%9B%86][支撑]]* ）与参数 $\theta$ 无关，并且支撑中 $\frac{\partial \ln p(x ; \theta)}{\partial \theta}$ 存在。
+2. 对任意存在期望的统计量 $T$ ，有
+$$
+\begin{array}{l}
+\frac{\partial}{\partial \theta} \int_{-\infty}^{+\infty} \cdots \int_{-\infty}^{+\infty} T\left(x_{1}, x_{2}, \cdots, x_{n}\right) p\left(x_{1}, x_{2}, \cdots, x_{n} ; \theta\right) \mathrm{d} x_{1} \cdots \mathrm{d} x_{n} \\
+=\int_{-\infty}^{+\infty} \cdots \int_{-\infty}^{+\infty} T\left(x_{1}, x_{2}, \cdots, x_{n}\right) \frac{\partial}{\partial \theta} p\left(x_{1}, x_{2}, \cdots, x_{n} ; \theta\right) \mathrm{d} x_{1} \cdots \mathrm{d} x_{n}
+\end{array}
+$$
+
+*有效估计* 是方差达到C-R下界的无偏估计。
+* 第三章 假设检验
+假设检验是给出一个原假设和一个备择假设，对某个显著性水平 $\alpha$ 计算拒绝域。原假设和备择假设是在参数空间中划分出来的子空间。
+
+第一类错误：弃真。概率 $\alpha$ 为在原假设参数空间中样本落入拒绝域的概率。
+$$
+\alpha(\theta)=P_{\theta}\{x \in W\}, \quad \theta \in \Theta_{0}
+$$
+第二类错误：取伪。概率 $\beta$ 为在备择假设参数空间中样本不在拒绝域的概率。
+$$
+\beta(\theta)=P_{\theta}\{x \notin W\}=1-P_{\theta}\{x \in W\}, \quad \theta \in \Theta_{1}
+$$
+检验的 *势* 或 *功效* 是 $\gamma = 1-\beta(\theta)$ ，是在备择假设参数空间中样本落在拒绝域的概率。
+$$
+\gamma(\theta)=P_{\theta}\{x \in W\}=1-\beta(\theta), \quad \theta \in \Theta_{1}
+$$
+*势函数* 是在接受域取 $\alpha$ ，拒绝域取 $\gamma$ 的函数。当 $\theta \in \Theta_{0}$ 时, $g(\theta)=\alpha(\theta)$; 当 $\theta \in \Theta_{1}$ 时, $g(\theta)=\gamma(\theta)$ 。也可以写做
+$$
+g(\theta)=P_{\theta}\{x \in W\}=E_{\theta}(\varphi(x)), \quad \theta \in \Theta
+$$
+其中
+$$
+\varphi(x)=\left\{\begin{array}{ll}
+1, & x \in W \\
+0, & x \notin W
+\end{array}\right.
+$$
+
+** 似然比检验
+对假设检验问题
+$$
+H_{0}: \theta=\theta_{0}, \quad H_{1}: \theta=\theta_{1} \quad\left(\theta_{1}>\theta_{0}\right)
+$$
+构造 *似然比*
+$$
+\lambda(x)=\frac{\sup _{\theta \in \Theta}\left\{p\left(x_{1}, \cdots, x_{n} ; \theta\right)\right\}}{\sup _{\theta \in \Theta_{0}}\left\{p\left(x_{1}, \cdots, x_{n} ; \theta\right)\right\}}
+$$
+此时由于 $\Theta_{0} \subset \Theta$, 所以有 $\lambda(x) \geqslant 1$ 。若 $\lambda(x)$ 取值较大，说明 $H_0$ 成立概率较小。因此拒绝域形式为：
+$$
+W=\left\{\left(x_{1}, x_{2}, \cdots, x_{n}\right): \lambda(x) \geqslant c\right\}
+$$
+其中c可以由 $P_{\theta_{0}}\{\lambda(x) \geqslant c\} \leqslant \alpha$ 确定，其中 $\theta_0 \in \Theta_0$ 。
+
+计算似然比统计量时未知的参数由极大似然估计值代入。求解拒绝域时需要找到一个 *枢轴变量* ，代入似然比统计量中，最后拒绝域中的 $c$ 可以由方便确定显著性水平的枢轴变量 $z$ 的分位数 $z_{1-\alpha}$ 计算。拒绝域也可以由 $W = \{(x_1, x_2, \cdots, x_n): z \geqslant c1\} = \{x: \lambda(x) \geqslant c \}$ 表示，但需要似然比统计量对枢轴变量单调。 *枢轴变量* 是一个仅含有统计量 $\hat{\theta}$ 和参数 $\theta$ ，不含其他未知量的函数 $g(\hat{\theta}, \theta)$ 。 $g(\hat{\theta}, \theta)$ 的分布完全已知且与参数 $\theta$ 无关。
+
+** 一致最优势检验--UMPT
+对假设检验问题的好坏我们也有一评判标准，就是在控制犯第一类错误 $\alpha$ 的情况下，尽力减少犯第二类错误的概率，也就是增加检验的势。如果是简单假设检验问题，也就是原假设和备择假设参数空间都只有一个值的假设，在一类控制犯第一类错误小于 $\alpha$ 的检验中，势最大的那个就叫做 *最优势检验(MPT)* 。如果是复合假设检验问题，原假设和备择假设参数空间都有多个取值，对备择假设参数空间中参数任意取值都能做到势最大的假设叫做 *一致最优势检验（UMPT)* 。
+
+求UMPT的方法也是对样本的联合密度函数进行分解。如果样本 $x_{1}, x_{2}, \cdots, x_{n}$ 的联合密度函数 (或分布列) $p(x ; \theta)(\theta \in \Theta)$ 是单参数的并可以表示为
+$$
+p(x ; \theta)=d(\theta) h(x) \exp \{c(\theta) T(x)\}
+$$
+其中 $\theta$ 是实值参数, *且 $c(\theta)$ 关于 $\theta$ 是严格单调增函数*, 则对单侧检验问题
+$$
+H_{0}: \theta \leqslant \theta_{0}, \quad H_{1}: \theta>\theta_{0}
+$$
+
+1. 水平为 $\alpha$ 的一致最优势检验存在, 其检验函数为 $$\varphi^{*}(x)=\left\{\begin{array}{ll}
+   1, & T(x)>c \\
+   r, & T(x)=c \\
+   0, & T(x)<c
+   \end{array}\right.$$ 其中常数 $c$ 和 $r \in[0,1]$ 由 $E_{\theta_{0}}\left(\varphi^{ * }(x)\right)=\alpha$ 确定。
+2. 水平为 $\alpha$ 的一致最优势检验 $\varphi^{ * }(x)$ 的势函数 $E_{\theta}\left(\varphi^{ * }(x)\right)$ 是 $\theta$ 的单调增函数。
+
+如果以上定理中的 $c(\theta)$ 是 $\theta$ 的严格单调减函数,结论同样成立, 只需要将检验函数中的不等号改变方向。
+
+对假设检验问题
+$$
+H_{0}: \theta=\theta_{0}, \quad H_{1}: \theta>\theta_{0}
+$$
+上述结论全部成立。
+
+对假设检验问题
+$$
+H_{0}: \theta=\theta_{0}, \quad H_{1}: \theta<\theta_{0}
+$$
+和
+$$
+H_{0}: \theta \geqslant \theta_{0}, \quad H_{1}: \theta<\theta_{0}
+$$
+可以分别化为假设检验问题
+$$
+H_{0}:-\theta=-\theta_{0}, \quad H_{1}:-\theta>-\theta_{0}
+$$
+和
+$$
+H_{0}:-\theta \leqslant-\theta_{0}, \quad H_{1}:-\theta>-\theta_{0}
+$$
+
+*** 一致最优势无偏检验--UMPUT
+有些假设检验问题不存在UMPT。我们可以要求一类满足 *无偏性* 的检验类，在其中找到最优势检验。
+
+设 $\varphi(x)$ 是假设检验问题 $H_{0}: \theta \in \Theta_{0}, \quad H_{1}: \theta \in \Theta_{1}$ 的检验函数, 若其势函数 $g_{\varphi}(\theta)=E_{\theta}(\varphi(x))$ 满足 $$\left.\begin{array}{ll}g_{\varphi}(\theta) \leqslant \alpha, & \theta \in \Theta_{0} \\ g_{\varphi}(\theta) \geqslant \alpha, & \theta \in \Theta_{1}\end{array}\right\}$$ 则称 $\varphi(x)$ 是水平为 $\alpha$ 的无偏检验 (Unbiased Test)。 也就是说，相比于一致最优势检验，无偏检验增加了势( $\gamma$ ，样本在备择假设参数空间落入拒绝域的概率) 大于等于显著性水平 $\alpha$ 的要求。也就是对增加了一个势的最小值条件。显然, 水平为 $\alpha$ 的一致最优势检验一定是无偏检验。UMPUT就是在满足该条件的情况下势最大的检验。有些假设检验问题可能不存在UMPT，但存在UMPUT。
+* 第五章 方差分析
+** 方差分析
+方差分析是用于分析每个自变量（因素）对因变量影响程度的技术。其基本思想是将数据的总离差平方和 $S_T$ 分解为由各个因素 $A, B, \cdots$ 引起的离差平方和 $S_A, S_B, \cdots$ 加上随机误差引起的误差平方和 $S_e$ 。
+$$S_T = S_A + S_B + S_e$$
+有时候会考虑因素之间相互作用引起的变化，如 $S_{A \times B}$ 。
+
+总离差平方和是每个样本观察值与所有观察值的均值之间距离的平方和；因素 $A$ 引起的离差平方和是因素 $A$ 的不同水平的样本观察值均值与所有观察值均值之间距离的平方和，需要通过在每个水平的均值重复 $n$ 次保留样本容量信息；误差平方和是所有观察值与每个因素都取相同水平重复实验的观察值均值之间距离的平方和。
+$$\begin{array}{l}
+S_{T}=\sum_{i=1}^{p} \sum_{j=1}^{n_{i}}\left(x_{i j}-\bar{x}\right)^{2} \\
+S_{A}=\sum_{i=1}^{p} \sum_{j=1}^{n_{i}}\left(\bar{x}_{i\cdot}-\bar{x}\right)^{2}=\sum_{i=1}^{p} n_{i}\left(\bar{x}_{i\cdot}-\bar{x}\right)^{2} \\
+S_{e}=\sum_{i=1}^{p} \sum_{j=1}^{n_{i}}\left(x_{i j}-\bar{x}_{i} .\right)^{2}
+\end{array}$$
+
+可以用 $S_A, S_e$ 构造 $\chi^2$ 分布，进而构造F分布，用做计算因素 $A$ 是否对因变量有影响的假设检验问题的枢轴变量。需要注意 $S_A, S_B, S_{A \times B}, S_e$ 等平方和的自由度，分别是在各自求均值的维度上减去1（因为在该维度有一个限制条件，即求和为0，自由度减少了1），再乘上保留下的其他维度的信息。
+
+| 方差来源     | 平方和                                                      | 自由度       |
+| $A$          | $S_A=qr\sum^{p}_{i=1}{(\bar{x_{i\cdot\cdot}}-\bar{x})}^2$   | $p-1$        |
+| $B$          | $S_B=pr\sum^{q}_{i=1}{(\bar{x_{\cdot j \cdot}}-\bar{x})}^2$ | $q-1$        |
+| $A \times B$ | $S_{A \times B}$                                            | $(p-1)(q-1)$ |
+| $e$          | $S_e$                                                       | $pq(r-1)$    |
+| $\Sigma$     | $S_T$                                                       | $pqr-1$      |
+
+** 正交实验设计
+有交互作用的两个因素A和B分别放在第i列和第j列，交互作用表上i行j列的数字就是 $A \times B$ 应该放到的列。一个因素每个水平的结果为实际试验数据中该因素所有取该水平的结果求和。一个因素中差值最大的两个水平结果之差就是该因素的极差。得到每个因素的极差后从大到小排序就得到因素主要到次要影响排序，两个因素数值相差大用 =;= 分隔，相差小用 =,= 分隔。最优方案是每个因素取到最大结果的水平，按影响从大到小确定每个因素的水平后进行组合。
+* 第八章 相关分析
+** 主成分分析
+总体 $\textbf{x} = {(x_1, x_2, \cdots, x_p)}^{\prime}$ 有 $p$ 个指标，其协方差矩阵 $\Sigma$ 的特征值依次为 $\lambda_1 \geqslant \lambda_2 \geqslant \cdots \geqslant \lambda_p \geqslant 0$ ，相应的正交特征向量 $\textbf{a}_1, \textbf{a}_2, \cdots, \textbf{a}_p$ 。第 $i$ 个主成分为 $y_i = {\textbf{a}_i}^{\prime}\textbf{x}$ ，其方差为 $\lambda_i$ 。
+
+第 $i$ 个主成分的贡献率为 $$\frac{\lambda_i}{\sum^{p}_{i=1}\lambda_i}$$ 前 $k$ 个主成分的累计贡献率为 $$\frac{\sum_{i=1}^{k}\lambda_i}{\sum^{p}_{i=1}\lambda_i}$$
+
+若对原始数据先进行标准化，另 $$x_j^{ * }=\frac{x_j-\mu_j}{\sqrt{\sigma_{jj}}}$$  $x_j^{ * }$ 的协方差矩阵就是 $\textbf{x}$ 的相关系数矩阵 $\textbf{R}$ 。

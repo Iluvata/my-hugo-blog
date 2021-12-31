@@ -1,0 +1,21 @@
+---
+title: "用org-mode进行学术写作（以及其他）"
+date: 2021-12-29T14:51:14+08:00
+draft: true
+tags: ['emacs']
+categories: ['life']
+---
+
+emacs有很多的插件，让我们可以用他做几乎任何事情。我参考[[http://www.wouterspekkink.org/academia/writing/tool/doom-emacs/2021/02/27/writing-academic-papers-with-org-mode.html][这篇博客]]搭了一个org-mode写学术论文的配置。之后还准备了用org做pre等事情。
+
+* tex模板
+** 表格和图片
+* 引用
+
+* 笔记和pdf-tools
+* 其他
+** 导图
+** GTD
+** presentation
+** 番茄钟
+org自带了计时器， =M-x org-timer-set-timer= 或 =C-c C-x ;= 可以开始计时。暂停可以用 =M-x org-timer-pause-or-continue= 或 =C-c C-x ,= 停止用 =M-x org-timer-stop= 或 =C-c C-x _= 。如果不设置 =org-clock-sound= ，时间结束的时候只会弹出通知但不会有声音。在配置中添加 =(setq org-clock-sound "~/Downloads/ding.wav")= ，结束时就会播放 =ding.wav= 。

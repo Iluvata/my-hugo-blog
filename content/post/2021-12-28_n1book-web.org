@@ -35,3 +35,17 @@ GitHack.py http://www.openssl.org/.git/
 #+begin_Src shell
 scrabble http://example.com/
 #+end_src
+* SQL注入
+- 数字型注入
+  若输入参数为1，查询的语句为 =select * from table where id=1= 。若输入参数为1+1返回2的结果，基本能确定是数字型输入。
+  参数前后没有过滤也没有引号，可以直接union。
+
+- 字符型注入
+  在输入参数前后加了引号。若输入参数为1，查询语句为 =select * from table where id = '1'= 。可以通过补全引号后在后面加union，在最后加上#或者--+注释掉之后的内容。
+
+** SQL注入-1
+先测试一下，发现只有id=1, 2, 3的时候有内容。id=3的时候提示有后门参数tips，tips=1会显示出执行的sql语句。
+
+[[/img/2021-12-29_sql1-tips.png]]
+
+可以看出是字符形式的注入。执行 =select * from notes where id ='-1' union select 1,2, group_concat(table_name) from information_schema.tables where table_schema=database()#'= 获取表名，查到有个表 =fl4g= 。要注意select出来的个数必须为3，直接 =select *= 查不到东西。应该是后台过滤了参数必须为3个，并且只有后面两个会显示，所以查出来的 =table_name= 也要用 =group_concat= 合并为一个字段。拿到表名后执行 =select * from notes where id ='4' union select 1,2,group_concat(column_name) from information_schema.columns where table_name = 'fl4g' #'= 获取到列名为fllllag。最后执行 =select * from notes where id = '4' union select 1,2,fllllag from fl4g= 就能获取flag。
