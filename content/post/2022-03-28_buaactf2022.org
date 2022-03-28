@@ -1,7 +1,10 @@
 ---
 title: "BUAACTF2022 WP"
 date: 2022-03-28T13:53:31+08:00
+tags: ['ctf', 'pwn']
+categories: ['life', 'learning']
 draft: false
+cover: "/img/2022-03-28_buaactf2022.png"
 ---
 
 * crypto
@@ -109,7 +112,9 @@ printf(buf);
 }
 #+end_src
 ** 拿到shell是一件很嘻哈的事
-[[/img/2022-03-28_shell.png][ida]]
+
+[[/img/2022-03-28_shell.png]]
+
 ida看一眼，发现是orw+rop。
 #+begin_src shell
 ubuntu@pwn:~/bridge/buaactf2022/pwn/shell$ seccomp-tools dump ./shell
@@ -166,14 +171,21 @@ p.interactive()
 #+end_src
 ** dream
 libc2.34下的堆题。
-[[/img/2022-03-28_new-dream.png][new-dream]]
+
+[[/img/2022-03-28_new-dream.png]]
+
 new_dream是read后没有写入'\x00'，有信息泄漏。INDEX没有限制上限，可以无限创建新dream；但其实bss里只能放下8个地址，再往后就会覆盖SIZES。可以利用这点来修改SIZES，使得在edit_dream时可以覆盖下一堆块。
-[[/img/2022-03-28_bss.png][dream-bss]]
-[[/img/2022-03-28_edit-dream.png][edit-dream]]
+
+[[/img/2022-03-28_bss.png]]
+
+[[/img/2022-03-28_edit-dream.png]]
+
 edit_dream有off-by-null。
 
 那么就可以用edit时的off-by-null让下一堆块认为上一块not in use，触发unlink后可以任意读写。
-[[/img/2022-03-28_unlink.jpeg][unlink]]
+
+[[/img/2022-03-28_unlink.jpeg]]
+
 通过读HEAP_PTRS内容拿到堆地址，再计算堆内偏移，读到dream1中保存的unsorted bin addr，leak libc base.
 #+begin_src python
 # leak
