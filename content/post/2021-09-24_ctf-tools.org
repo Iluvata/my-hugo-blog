@@ -9,9 +9,13 @@ categories: ['learning']
 * 环境搭建
 在mac上我觉得比较好用的环境是multipass中ubuntu虚拟机+宿主机中的idapro，以及宿主机上vscode写python wp，在虚拟机中运行。
 
+#+begin_src shell
+multipass launch 16.04 --name pwn --disk 15G --mem 4G
+#+end_src
+
 multipass默认分配的内存和磁盘不太够用，建议内存分4G，磁盘分15G。ubuntu版本选择16.04. 虚拟机内环境配置可以参考[[https://github.com/giantbranch/pwn-env-init][pwn-env-init]]，建议使用py2. 但是脚本是用apt-get安装pip的，可能会有些问题，需要 =curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py= 然后运行 =get-pip.py= 。还有 =one_gadget= 目前需要ruby版本高于2.4，apt-get安装的ruby是2.3。可以执行下面的命令安装
 
-#+begin_src shell
+,#+begin_src shell
 $ sudo apt-add-repository ppa:brightbox/ruby-ng
 
 $ sudo apt-get update

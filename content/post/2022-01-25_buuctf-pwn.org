@@ -1,0 +1,16 @@
+---
+title: "buuctf刷题-pwn"
+date: 2022-01-25T16:09:10+08:00
+draft: true
+---
+* ciscn_2019_c_1
+典型的ret2libc，不过没给出libc版本，需要通过泄漏函数got去找libc版本。可以用[[https://www.it610.com/article/1295247433932021760.htm][libcsearcher]]找，也可以用[[https://libc.blukat.me/][libc database]]。要是都不行，但是能拿到任意地址内容，可以用[[https://www.anquanke.com/post/id/85129][DynELF]]。libcSearcher用法如下
+#+begin_src python
+libc=LibcSearcher('puts',puts)
+libc_addr=puts-libc.dump('puts')
+binsh=libc_addr+libc.dump('str_bin_sh')
+system=libc_addr+libc.dump('system')
+#+end_src
+rop直接ret2libc调用system运行不成功，发现[[http://blog.eonew.cn/archives/958][system调用时需要注意偏移]]。再尝试加几个ret的gadget使栈对齐就行了。
+
+[[https://darkwing.moe/2019/11/26/ciscn-2019-c-1/][参考wp]]

