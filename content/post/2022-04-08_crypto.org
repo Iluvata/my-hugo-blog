@@ -1,0 +1,34 @@
+---
+title: "密码学"
+date: 2022-04-08T19:44:08+08:00
+draft: false
+---
+
+* 密码学常用工具
+** gmpy2 Crypto rsa etc.
+#+begin_src python
+import gmpy2
+from Crypto.PublicKey import RSA
+import rsa
+import base64
+public = RSA.importKey(open('./key.pub').read())
+n = public.n
+e = public.e
+print('n = ', n)
+print('e = ', e)
+p = 863653476616376575308866344984576466644942572246900013156919
+q = 965445304326998194798282228842484732438457170595999523426901
+fn = (p - 1) * (q - 1)
+d = gmpy2.invert(e, fn)
+key = rsa.PrivateKey(n, e, int(d), p, q)
+with open(./flag.b64", "rb") as f:
+f = base64.b64decode(f.read())
+print(rsa.decrypt(f, key).strip())
+#+end_src
+Crypto.PublicKey 能用来解析 =.pub=
+
+** 大数分解
+在线：www.factordb.com
+能分解100位以内
+* RSA
+* 格密码
