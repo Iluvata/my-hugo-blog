@@ -2,6 +2,7 @@
 title: "密码学"
 date: 2022-04-08T19:44:08+08:00
 draft: false
+math: true
 ---
 
 * 密码学常用工具
@@ -32,3 +33,35 @@ Crypto.PublicKey 能用来解析 =.pub=
 能分解100位以内
 * RSA
 * 格密码
+** NTRU
+NSSCTF LittleLattice
+#+begin_src python
+from Crypto.Util.number import *
+from hashlib import *
+
+p = getPrime(2048)
+f = getPrime(1024)
+g = getPrime(768)
+h = pow(f,-1,p)*g%p
+verify = sha256(bytes.fromhex(hex(f+g)[2:])).hexdigest()
+print(f'verify = {verify}')
+print(f'p = {p}')
+print(f'h = {h}')
+print('NSSCTF{' + md5(bytes.fromhex(hex(f+g)[2:])).hexdigest() + '}')
+#+end_src
+有 $f^{-1}g \equiv h \space (mod \space p)$ . 已知 $h$ 和 $p$ ，求 $f$ 和 $g$ . 并且 $f$ 和 $g$ 的位数远小于 $p$ .
+NTRU加密方式是用随机数 $r$ 做 $c \equiv r \cdot h + m \space (mod \space p)$ 。具体可以看 [[http://www.hackdig.com/02/hack-57841.htm][从一道CTF题初探NTRU格密码]] 。 破解NTRU密码的关键是模数的大小关系。类似的思想在别的很多题目里也有体现。
+
+构造以 $(1, h), (0, p)$ 为基的格，则向量  $(f, g)$ 落在这个格上，并且长度很小，大概在 $2^1024$ . 根据 The Gaussian Heuristic 格中最短向量长度大约是这个量级，因此 $(f, g)$ 大概率就是格中最短向量。
+
+用高斯格基规约可求出最短向量。高斯格基规约就是 gram-schmidt 正交化在减去投影的过程中只剪去整数倍的投影，反复进行尽量使向量变短。
+#+begin_src python
+def GaussLatticeReduction(v1, v2):
+    while True:
+        if v2.norm() < v1.norm():
+            v1, v2 = v2, v1
+        m = round( v1*v2 / v1.norm()^2 )
+        if m == 0:
+            return (v1, v2)
+        v2 = v2 - m*v1
+#+end_src
