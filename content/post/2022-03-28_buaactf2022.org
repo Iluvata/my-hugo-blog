@@ -8,7 +8,6 @@ cover: "/img/2022-03-28_buaactf2022.png"
 ---
 
 * crypto
-
 ** ez game
 求逆，哈希碰撞
 #+begin_src python
@@ -73,7 +72,6 @@ print(proof)
 #+end_src
 
 * pwn
-
 ** math
 最后除法触发signal就给shell。但除数过滤了0，可以用INT_MIN / -1触发整数上溢。
 #+begin_src python

@@ -65,3 +65,17 @@ def GaussLatticeReduction(v1, v2):
             return (v1, v2)
         v2 = v2 - m*v1
 #+end_src
+* 二次剩余
+[[https://oi-wiki.org/math/number-theory/quad-residue/][OI-wiki]]
+[[https://chenyangwang.gitbook.io/mathematical-base-for-information-safety/er-ci-tong-yu-shi-he-ping-fang-sheng-yu/mo-ping-fang-gen][模平方根]]
+可以直接用gmpy2求根
+#+begin_src python
+from gmpy2 import *
+from Crypto.Util.number import *
+n = getPrime(2048)
+e = 16
+c = pow(m, e, n)
+R.<x> = Zmod(n)[]
+f = x^e-c
+m_list = [int(i[0]) for i in f.roots()]
+#+end_src
