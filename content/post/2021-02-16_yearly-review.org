@@ -120,7 +120,7 @@ cover: "/img/2021-02-16_max-coffee.jpg"
    app像margin note用来做英语作文导图背数学公式整理错题（我本来是用错题本手抄的，后面懒得抄了，
    刚好也懒得每天带答案册，在ipad上用pdf的，就直接在上面整理错题了），documents用来看专业课课件啥的。
 
-   [[/img/2021-03-29_margin.PNG]]
+   [[/img/2021-03-29_margin.png]]
    
    8月听的最多的专辑是the beach boys的pet sounds和the doors的the doors，the who的who's next.
    9-10月听的最多的专辑是the band的music from big pink和the beach boys的pet sounds.
@@ -136,7 +136,7 @@ cover: "/img/2021-02-16_max-coffee.jpg"
    就想着在图书馆找几本钱德勒的侦探小说看看。于是在11月这个正常来说应该是特别紧张的时间我又看了3
    本侦探小说。。。
    
-   [[/img/2021-03-29_running.PNG]]
+   [[/img/2021-03-29_running.png]]
    
    然后因为在9月参加了一次CSP拿了300分，10月有个CCSP学校可以报销，也就去玩了一天（本来以为能去外校
    玩的，但因为疫情每个学校都在自己校内组织。。）。做了一天最后只拿了20分。。但因为西南赛区强校比较少，
