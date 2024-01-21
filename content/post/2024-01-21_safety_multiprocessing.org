@@ -1,0 +1,65 @@
+---
+title: "系统编程安全--多进程"
+date: 2024-01-21T15:10:06+08:00
+draft: false
+---
+
+* fork
+** unexpected child
+#+begin_src c
+int createChildAndSayHello() {
+    pid_t pid = fork();
+    if (pid == 0) {
+        sayHello();
+        return 0;
+    }
+    waitpid(pid);
+}
+#+end_src
+
+这里不是在main中调用fork， return后回到的是main函数或者调用函数，并没有退出子进程。类似的错误还有在处理fork多个child时不恰当的循环导致子进程也fork出预期外的孙子进程。
+
+** fork 与多线程混合使用可能出现的问题
+#+begin_src c
+pid_t pid = fork();
+if (pid == 0){
+    const char** args = malloc(sizeof(char *) * num_args);
+    // Note: On execvp, all memory will be freed.
+    execvp(args[0], args);
+    // If execvp failed, free memory and exit.
+    free(args);
+    exit(1);
+}
+#+end_src
+
+fork 后子进程的内存状态与父进程一样，包括堆栈和锁。fork只会复制当前线程。如果fork时有别的线程获得了malloc锁，fork后的malloc锁不能解除。fork时malloc会处于不安全状态吗？
+
+结论：fork后不要再使用当前memory，直接exec。fork 与 exec 分为两个系统调用是为了方便重新分配pipe等。
+* pipe
+#+begin_src c
+if (close(fds[1] == -1)) {
+    printf("Error closing!");
+}
+#+end_src
+
+should be =close(fds[1])=. 由于fds是 int[] ，容易类型混淆。
+除此之外，两个进程之间pipe处理不好可能导致死锁。
+
+* signal
+signal() is dead.  use sigaction(). 可移植性问题。存在未定义行为。
+
+#+begin_src c
+void handler(int sig) {
+ printf("Hehe, not exiting!\n");
+}
+int main() {
+ signal(SIGINT, handler);
+ while (true) {
+ printf("Looping...\n");
+ sleep(1);
+ }
+ return 0;
+}
+#+end_src
+
+printf需要锁。如果有signal在main中俄printf获得锁后触发则会死锁。不要在signal handler 中做一些复杂的操作。对并发支持不友好。可以用pipe将signal触发后在一个新线程中处理。线程对并发支持更完善。
